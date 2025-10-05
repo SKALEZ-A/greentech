@@ -1,0 +1,214 @@
+{
+  "inputValidation": {
+    "general": {
+      "maxStringLength": 10000,
+      "maxArrayLength": 1000,
+      "maxObjectDepth": 10,
+      "allowedCharacters": {
+        "alphanumeric": "^[a-zA-Z0-9\\s\\-_\\.]+$",
+        "email": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+        "phone": "^[+]?[1-9]\\d{1,14}$",
+        "url": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$"
+      }
+    },
+    "user": {
+      "email": {
+        "required": true,
+        "type": "email",
+        "maxLength": 254,
+        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      },
+      "password": {
+        "required": true,
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 128,
+        "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]",
+        "description": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      },
+      "firstName": {
+        "required": true,
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-zA-Z\\s\\-']+$"
+      },
+      "lastName": {
+        "required": true,
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-zA-Z\\s\\-']+$"
+      },
+      "role": {
+        "required": true,
+        "type": "enum",
+        "values": ["admin", "operator", "analyst", "auditor"]
+      }
+    },
+    "unit": {
+      "name": {
+        "required": true,
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 100,
+        "pattern": "^[a-zA-Z0-9\\s\\-_\\(\\)\\&]+$"
+      },
+      "type": {
+        "required": true,
+        "type": "enum",
+        "values": ["direct_air_capture", "flue_gas_capture", "industrial_process", "biomass_capture"]
+      },
+      "capacity_tons_per_day": {
+        "required": true,
+        "type": "number",
+        "min": 1,
+        "max": 10000
+      },
+      "location": {
+        "required": true,
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "min": -90,
+            "max": 90
+          },
+          "longitude": {
+            "type": "number",
+            "min": -180,
+            "max": 180
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "sensor": {
+      "sensor_id": {
+        "required": true,
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 50,
+        "pattern": "^[A-Z0-9\\-_]+$"
+      },
+      "sensor_type": {
+        "required": true,
+        "type": "enum",
+        "values": ["temperature", "pressure", "flow_rate", "co2_concentration", "energy_consumption", "humidity", "vibration", "motor_current", "ph_level", "conductivity"]
+      },
+      "unit_id": {
+        "required": true,
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "value": {
+        "required": true,
+        "type": "number",
+        "min": -1000,
+        "max": 1000000
+      },
+      "quality": {
+        "required": false,
+        "type": "enum",
+        "values": ["good", "fair", "poor"],
+        "default": "good"
+      }
+    },
+    "carbonCredit": {
+      "project_name": {
+        "required": true,
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 200,
+        "pattern": "^[a-zA-Z0-9\\s\\-_\\(\\)\\&\\,\\.]+$"
+      },
+      "amount_total": {
+        "required": true,
+        "type": "number",
+        "min": 1,
+        "max": 10000000
+      },
+      "vintage_year": {
+        "required": true,
+        "type": "number",
+        "min": 2000,
+        "max": 2050
+      },
+      "methodology": {
+        "required": true,
+        "type": "enum",
+        "values": ["direct_air_capture", "industrial_capture", "biomass_capture", "nature_based", "renewable_energy"]
+      },
+      "region": {
+        "required": true,
+        "type": "string",
+        "maxLength": 100
+      },
+      "price_per_ton": {
+        "required": false,
+        "type": "number",
+        "min": 0,
+        "max": 10000
+      }
+    },
+    "aiOptimization": {
+      "unit_id": {
+        "required": true,
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "strategy": {
+        "required": false,
+        "type": "enum",
+        "values": ["efficiency_focused", "energy_efficient", "maintenance_prioritized", "balanced"],
+        "default": "balanced"
+      },
+      "timeframe_hours": {
+        "required": false,
+        "type": "number",
+        "min": 1,
+        "max": 720,
+        "default": 24
+      },
+      "max_changes": {
+        "required": false,
+        "type": "number",
+        "min": 1,
+        "max": 20,
+        "default": 5
+      }
+    }
+  },
+  "sanitization": {
+    "enabled": true,
+    "rules": {
+      "html": {
+        "allowedTags": [],
+        "allowedAttributes": {}
+      },
+      "sql": {
+        "escapeSpecialChars": true
+      },
+      "script": {
+        "removeScriptTags": true,
+        "removeEventHandlers": true
+      }
+    }
+  },
+  "rateLimiting": {
+    "enabled": true,
+    "rules": {
+      "input_validation": {
+        "maxRequestsPerMinute": 1000,
+        "burstLimit": 100
+      },
+      "file_upload": {
+        "maxRequestsPerMinute": 10,
+        "burstLimit": 5
+      }
+    }
+  }
+}

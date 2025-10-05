@@ -1,0 +1,31 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 60s
+      httpMethod: POST
+
+  - name: MongoDB
+    type: mongodb-datasource
+    access: proxy
+    url: mongodb://mongodb:27017
+    database: carbon_capture_prod
+    editable: true
+    jsonData:
+      maxConcurrentQueries: 10
+      connectionTimeout: 30s
+
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis://redis:6379
+    editable: true
+    jsonData:
+      client: standalone

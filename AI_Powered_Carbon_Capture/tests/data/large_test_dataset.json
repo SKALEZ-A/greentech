@@ -1,0 +1,413 @@
+[
+  {
+    "unitId": "CC-001",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sensors": {
+      "temperature": 25.3,
+      "pressure": 98.7,
+      "flow_rate": 95.2,
+      "co2_concentration": 412.8,
+      "humidity": 58.3,
+      "energy_consumption": 187.4,
+      "air_quality": 87.5,
+      "vibration": 2.1,
+      "noise_level": 45.8,
+      "particulate_matter": 12.3
+    },
+    "ai_optimization": {
+      "current_efficiency": 94.7,
+      "predicted_efficiency": 95.2,
+      "energy_savings": 15.3,
+      "optimization_suggestions": [
+        {
+          "type": "energy",
+          "title": "Variable Speed Drive Implementation",
+          "description": "Install VSD to optimize energy consumption based on demand",
+          "impact": {
+            "co2_increase": 2.1,
+            "energy_savings": 25.0,
+            "cost_savings": 180.50
+          },
+          "priority": "high",
+          "actionable": true
+        },
+        {
+          "type": "maintenance",
+          "title": "Filter Replacement Schedule",
+          "description": "Replace air filters to maintain optimal flow rates",
+          "impact": {
+            "co2_increase": 1.8,
+            "energy_savings": 8.5,
+            "cost_savings": 45.20
+          },
+          "priority": "medium",
+          "actionable": true
+        }
+      ],
+      "predictive_maintenance": [
+        {
+          "component": "Air Filter",
+          "alert_type": "warning",
+          "message": "Air filter replacement recommended within 15 days",
+          "probability": 0.75,
+          "predicted_failure_date": "2024-01-16T00:00:00Z",
+          "recommended_action": "Schedule filter replacement maintenance"
+        }
+      ]
+    },
+    "carbon_credits": {
+      "total_credits": 1250.5,
+      "available_credits": 1180.3,
+      "retired_credits": 70.2,
+      "credit_price": 92.50,
+      "verification_status": "verified",
+      "last_transaction": "2024-01-15T14:30:00Z"
+    },
+    "performance": {
+      "uptime": 98.5,
+      "efficiency": 94.7,
+      "total_co2_captured": 45680.5,
+      "energy_intensity": 195.2,
+      "cost_per_ton": 89.50,
+      "roi": 24.3
+    },
+    "alerts": [],
+    "maintenance": {
+      "last_maintenance": "2023-12-15T08:00:00Z",
+      "next_scheduled_maintenance": "2024-01-15T08:00:00Z",
+      "maintenance_history": [
+        {
+          "date": "2023-12-15T08:00:00Z",
+          "type": "Preventive Maintenance",
+          "description": "Quarterly preventive maintenance inspection",
+          "technician": "John Smith",
+          "parts": ["Air Filter", "Lubricant"],
+          "cost": 1250.00,
+          "duration": 4.5
+        }
+      ]
+    }
+  },
+  {
+    "unitId": "CC-002",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sensors": {
+      "temperature": 28.9,
+      "pressure": 97.3,
+      "flow_rate": 88.7,
+      "co2_concentration": 389.4,
+      "humidity": 62.1,
+      "energy_consumption": 201.2,
+      "air_quality": 82.3,
+      "vibration": 2.8,
+      "noise_level": 48.2,
+      "particulate_matter": 15.7
+    },
+    "ai_optimization": {
+      "current_efficiency": 93.2,
+      "predicted_efficiency": 94.1,
+      "energy_savings": 12.8,
+      "optimization_suggestions": [
+        {
+          "type": "efficiency",
+          "title": "Flow Rate Optimization",
+          "description": "Adjust flow control valves for optimal CO2 capture",
+          "impact": {
+            "co2_increase": 3.2,
+            "energy_savings": 18.5,
+            "cost_savings": 142.30
+          },
+          "priority": "high",
+          "actionable": true
+        }
+      ],
+      "predictive_maintenance": [
+        {
+          "component": "CO2 Scrubber",
+          "alert_type": "info",
+          "message": "Routine inspection recommended within 30 days",
+          "probability": 0.45,
+          "predicted_failure_date": "2024-01-31T00:00:00Z",
+          "recommended_action": "Schedule routine inspection"
+        }
+      ]
+    },
+    "carbon_credits": {
+      "total_credits": 980.2,
+      "available_credits": 945.8,
+      "retired_credits": 34.4,
+      "credit_price": 91.20,
+      "verification_status": "verified",
+      "last_transaction": "2024-01-14T16:45:00Z"
+    },
+    "performance": {
+      "uptime": 97.8,
+      "efficiency": 93.2,
+      "total_co2_captured": 32150.8,
+      "energy_intensity": 201.5,
+      "cost_per_ton": 95.20,
+      "roi": 21.7
+    },
+    "alerts": [
+      {
+        "id": "alert_001",
+        "type": "performance",
+        "severity": "warning",
+        "title": "Efficiency Below Target",
+        "message": "Unit efficiency dropped below 94% target",
+        "acknowledged": false,
+        "createdAt": "2024-01-01T02:15:00Z"
+      }
+    ],
+    "maintenance": {
+      "last_maintenance": "2023-12-10T09:30:00Z",
+      "next_scheduled_maintenance": "2024-01-10T09:30:00Z",
+      "maintenance_history": [
+        {
+          "date": "2023-12-10T09:30:00Z",
+          "type": "Corrective Maintenance",
+          "description": "Fixed pressure regulator malfunction",
+          "technician": "Sarah Johnson",
+          "parts": ["Pressure Regulator", "O-rings"],
+          "cost": 890.00,
+          "duration": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "unitId": "CC-003",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sensors": {
+      "temperature": 26.8,
+      "pressure": 99.2,
+      "flow_rate": 112.5,
+      "co2_concentration": 425.7,
+      "humidity": 71.4,
+      "energy_consumption": 178.9,
+      "air_quality": 91.7,
+      "vibration": 1.9,
+      "noise_level": 42.1,
+      "particulate_matter": 9.8
+    },
+    "ai_optimization": {
+      "current_efficiency": 96.1,
+      "predicted_efficiency": 96.8,
+      "energy_savings": 8.9,
+      "optimization_suggestions": [
+        {
+          "type": "configuration",
+          "title": "Temperature Control Optimization",
+          "description": "Fine-tune cooling system for optimal sorbent performance",
+          "impact": {
+            "co2_increase": 1.5,
+            "energy_savings": 12.3,
+            "cost_savings": 89.10
+          },
+          "priority": "medium",
+          "actionable": true
+        }
+      ],
+      "predictive_maintenance": []
+    },
+    "carbon_credits": {
+      "total_credits": 1580.7,
+      "available_credits": 1520.3,
+      "retired_credits": 60.4,
+      "credit_price": 93.80,
+      "verification_status": "verified",
+      "last_transaction": "2024-01-15T11:20:00Z"
+    },
+    "performance": {
+      "uptime": 99.2,
+      "efficiency": 96.1,
+      "total_co2_captured": 52890.3,
+      "energy_intensity": 185.7,
+      "cost_per_ton": 82.40,
+      "roi": 28.9
+    },
+    "alerts": [],
+    "maintenance": {
+      "last_maintenance": "2023-12-20T07:15:00Z",
+      "next_scheduled_maintenance": "2024-01-20T07:15:00Z",
+      "maintenance_history": [
+        {
+          "date": "2023-12-20T07:15:00Z",
+          "type": "Preventive Maintenance",
+          "description": "Monthly system calibration and inspection",
+          "technician": "Mike Chen",
+          "parts": ["Calibration Kit", "Test Gases"],
+          "cost": 650.00,
+          "duration": 3.0
+        }
+      ]
+    }
+  },
+  {
+    "unitId": "CC-004",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sensors": {
+      "temperature": 24.3,
+      "pressure": 96.5,
+      "flow_rate": 103.8,
+      "co2_concentration": 398.6,
+      "humidity": 45.7,
+      "energy_consumption": 192.3,
+      "air_quality": 85.4,
+      "vibration": 2.4,
+      "noise_level": 46.9,
+      "particulate_matter": 13.2
+    },
+    "ai_optimization": {
+      "current_efficiency": 94.3,
+      "predicted_efficiency": 95.1,
+      "energy_savings": 14.2,
+      "optimization_suggestions": [
+        {
+          "type": "energy",
+          "title": "Renewable Energy Integration",
+          "description": "Increase solar power utilization during peak hours",
+          "impact": {
+            "co2_increase": 0.8,
+            "energy_savings": 22.5,
+            "cost_savings": 168.75
+          },
+          "priority": "high",
+          "actionable": true
+        },
+        {
+          "type": "maintenance",
+          "title": "Humidity Control Calibration",
+          "description": "Recalibrate humidity sensors for accurate readings",
+          "impact": {
+            "co2_increase": 2.3,
+            "energy_savings": 5.8,
+            "cost_savings": 32.50
+          },
+          "priority": "low",
+          "actionable": true
+        }
+      ],
+      "predictive_maintenance": [
+        {
+          "component": "Humidity Sensor",
+          "alert_type": "warning",
+          "message": "Humidity sensor calibration required within 10 days",
+          "probability": 0.82,
+          "predicted_failure_date": "2024-01-11T00:00:00Z",
+          "recommended_action": "Schedule sensor calibration"
+        }
+      ]
+    },
+    "carbon_credits": {
+      "total_credits": 1120.9,
+      "available_credits": 1085.6,
+      "retired_credits": 35.3,
+      "credit_price": 90.75,
+      "verification_status": "verified",
+      "last_transaction": "2024-01-13T13:10:00Z"
+    },
+    "performance": {
+      "uptime": 98.1,
+      "efficiency": 94.3,
+      "total_co2_captured": 38940.2,
+      "energy_intensity": 192.8,
+      "cost_per_ton": 87.90,
+      "roi": 25.6
+    },
+    "alerts": [
+      {
+        "id": "alert_002",
+        "type": "system",
+        "severity": "info",
+        "title": "System Update Available",
+        "message": "AI model update v1.2.1 is available for improved performance",
+        "acknowledged": false,
+        "createdAt": "2024-01-01T08:45:00Z"
+      }
+    ],
+    "maintenance": {
+      "last_maintenance": "2023-12-08T10:00:00Z",
+      "next_scheduled_maintenance": "2024-01-08T10:00:00Z",
+      "maintenance_history": [
+        {
+          "date": "2023-12-08T10:00:00Z",
+          "type": "Software Update",
+          "description": "Updated control system firmware to v2.1.4",
+          "technician": "Emma Wilson",
+          "parts": [],
+          "cost": 0.00,
+          "duration": 1.5
+        }
+      ]
+    }
+  },
+  {
+    "unitId": "CC-005",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "sensors": {
+      "temperature": 29.7,
+      "pressure": 101.4,
+      "flow_rate": 98.6,
+      "co2_concentration": 407.2,
+      "humidity": 53.8,
+      "energy_consumption": 195.7,
+      "air_quality": 88.9,
+      "vibration": 2.6,
+      "noise_level": 44.7,
+      "particulate_matter": 11.5
+    },
+    "ai_optimization": {
+      "current_efficiency": 95.4,
+      "predicted_efficiency": 96.2,
+      "energy_savings": 11.7,
+      "optimization_suggestions": [
+        {
+          "type": "configuration",
+          "title": "Air Quality Monitoring Enhancement",
+          "description": "Upgrade air quality sensors for better pollution tracking",
+          "impact": {
+            "co2_increase": 1.9,
+            "energy_savings": 9.2,
+            "cost_savings": 68.90
+          },
+          "priority": "medium",
+          "actionable": true
+        }
+      ],
+      "predictive_maintenance": []
+    },
+    "carbon_credits": {
+      "total_credits": 1340.1,
+      "available_credits": 1295.8,
+      "retired_credits": 44.3,
+      "credit_price": 94.25,
+      "verification_status": "verified",
+      "last_transaction": "2024-01-15T09:15:00Z"
+    },
+    "performance": {
+      "uptime": 98.7,
+      "efficiency": 95.4,
+      "total_co2_captured": 46280.7,
+      "energy_intensity": 188.9,
+      "cost_per_ton": 84.70,
+      "roi": 27.3
+    },
+    "alerts": [],
+    "maintenance": {
+      "last_maintenance": "2023-12-18T06:45:00Z",
+      "next_scheduled_maintenance": "2024-01-18T06:45:00Z",
+      "maintenance_history": [
+        {
+          "date": "2023-12-18T06:45:00Z",
+          "type": "Preventive Maintenance",
+          "description": "Bi-weekly system diagnostics and cleaning",
+          "technician": "David Brown",
+          "parts": ["Cleaning Solution", "Microfiber Cloths"],
+          "cost": 420.00,
+          "duration": 2.5
+        }
+      ]
+    }
+  }
+]

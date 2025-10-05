@@ -1,0 +1,142 @@
+{
+  "database": {
+    "connectionPool": {
+      "maxPoolSize": 20,
+      "minPoolSize": 5,
+      "maxIdleTimeMS": 30000,
+      "serverSelectionTimeoutMS": 5000,
+      "socketTimeoutMS": 45000,
+      "bufferMaxEntries": 0,
+      "bufferCommands": false
+    },
+    "readPreferences": {
+      "primary": {
+        "readPreference": "primary",
+        "maxStalenessSeconds": 90
+      },
+      "secondary": {
+        "readPreference": "secondaryPreferred",
+        "maxStalenessSeconds": 120
+      }
+    },
+    "writeConcerns": {
+      "default": {
+        "w": "majority",
+        "wtimeoutMS": 5000,
+        "j": true
+      },
+      "fast": {
+        "w": 1,
+        "j": false
+      }
+    },
+    "indexes": {
+      "sensorData": [
+        { "key": { "unit_id": 1, "sensor_type": 1, "timestamp": -1 }, "name": "unit_sensor_time" },
+        { "key": { "readings.current.timestamp": -1 }, "name": "current_reading_time" },
+        { "key": { "sensor_id": 1 }, "name": "sensor_id_unique", "unique": true },
+        { "key": { "alerts.timestamp": -1 }, "name": "alerts_timestamp" }
+      ],
+      "carbonCaptureUnit": [
+        { "key": { "location": "2dsphere" }, "name": "location_2dsphere" },
+        { "key": { "status": 1, "efficiency": -1 }, "name": "status_efficiency" },
+        { "key": { "name": 1 }, "name": "name_unique", "unique": true }
+      ],
+      "aiOptimizationResult": [
+        { "key": { "unit": 1, "timestamp": -1 }, "name": "unit_timestamp" },
+        { "key": { "model_version": 1 }, "name": "model_version" }
+      ],
+      "carbonCredit": [
+        { "key": { "owner": 1, "status": 1 }, "name": "owner_status" },
+        { "key": { "vintage_year": 1, "methodology": 1 }, "name": "vintage_methodology" }
+      ]
+    },
+    "aggregationPipeline": {
+      "allowDiskUse": true,
+      "maxTimeMS": 30000,
+      "batchSize": 1000
+    },
+    "profiling": {
+      "enabled": true,
+      "slowQueryThreshold": 100,
+      "sampleRate": 1.0
+    },
+    "monitoring": {
+      "commandMonitoring": true,
+      "connectionPoolMonitoring": true,
+      "serverMonitoring": true
+    }
+  },
+  "redis": {
+    "connection": {
+      "maxRetriesPerRequest": 3,
+      "retryDelayOnFailover": 100,
+      "enableReadyCheck": false,
+      "maxRetriesPerRequest": null,
+      "connectTimeout": 60000,
+      "commandTimeout": 5000,
+      "family": 4,
+      "keepAlive": true
+    },
+    "cluster": {
+      "enableOfflineQueue": false,
+      "redisOptions": {
+        "password": "your-redis-password"
+      }
+    },
+    "cache": {
+      "defaultTTL": 300,
+      "compression": true,
+      "keyPrefix": "ccn:",
+      "serializer": "json"
+    },
+    "session": {
+      "ttl": 86400000,
+      "prefix": "session:",
+      "rolling": true
+    },
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 100,
+      "prefix": "rl:"
+    }
+  },
+  "optimization": {
+    "queryOptimization": {
+      "useIndexHints": true,
+      "explainQueries": true,
+      "queryPlanner": true
+    },
+    "connectionOptimization": {
+      "connectionPooling": true,
+      "connectionMultiplexing": true,
+      "keepAlive": true
+    },
+    "cachingStrategy": {
+      "l1": {
+        "enabled": true,
+        "size": 1000,
+        "ttl": 300
+      },
+      "l2": {
+        "enabled": true,
+        "size": 10000,
+        "ttl": 3600
+      },
+      "l3": {
+        "enabled": true,
+        "ttl": 86400
+      }
+    },
+    "dataPartitioning": {
+      "enabled": true,
+      "strategy": "time_based",
+      "partitionSize": "1M",
+      "retentionPolicy": {
+        "sensorData": 365,
+        "aiResults": 180,
+        "logs": 90
+      }
+    }
+  }
+}

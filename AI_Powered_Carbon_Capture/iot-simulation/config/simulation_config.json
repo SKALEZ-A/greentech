@@ -1,0 +1,244 @@
+{
+  "simulation_config": {
+    "name": "Carbon Capture IoT Network Simulation",
+    "version": "1.0.0",
+    "description": "Comprehensive simulation configuration for carbon capture IoT network",
+    "author": "Carbon Capture Network Team",
+    "created": "2024-01-01"
+  },
+  "network_topology": {
+    "gateways": [
+      {
+        "id": "GATEWAY-001",
+        "location": "Industrial Park A",
+        "units": ["CC-001", "CC-002"],
+        "communication": {
+          "primary": "MQTT",
+          "backup": "HTTP",
+          "latency_ms": 50
+        }
+      },
+      {
+        "id": "GATEWAY-002",
+        "location": "Industrial Park B",
+        "units": ["CC-003"],
+        "communication": {
+          "primary": "MQTT",
+          "backup": "HTTP",
+          "latency_ms": 75
+        }
+      }
+    ],
+    "units": {
+      "CC-001": {
+        "name": "Carbon Capture Unit 1",
+        "type": "direct_air_capture",
+        "capacity_tons_per_day": 100,
+        "location": {
+          "latitude": 40.7128,
+          "longitude": -74.0060
+        },
+        "sensors": [
+          {"type": "temperature", "count": 3, "critical_threshold": 35},
+          {"type": "pressure", "count": 2, "critical_threshold": 60},
+          {"type": "flow_rate", "count": 2, "critical_threshold": 1500},
+          {"type": "co2_concentration", "count": 2, "critical_threshold": 500},
+          {"type": "energy_consumption", "count": 1, "critical_threshold": 1500}
+        ]
+      },
+      "CC-002": {
+        "name": "Carbon Capture Unit 2",
+        "type": "flue_gas_capture",
+        "capacity_tons_per_day": 150,
+        "location": {
+          "latitude": 40.7589,
+          "longitude": -73.9851
+        },
+        "sensors": [
+          {"type": "temperature", "count": 4, "critical_threshold": 40},
+          {"type": "pressure", "count": 3, "critical_threshold": 65},
+          {"type": "flow_rate", "count": 3, "critical_threshold": 1800},
+          {"type": "co2_concentration", "count": 2, "critical_threshold": 550},
+          {"type": "energy_consumption", "count": 1, "critical_threshold": 2000},
+          {"type": "humidity", "count": 1, "critical_threshold": 85}
+        ]
+      },
+      "CC-003": {
+        "name": "Carbon Capture Unit 3",
+        "type": "industrial_process",
+        "capacity_tons_per_day": 200,
+        "location": {
+          "latitude": 40.7505,
+          "longitude": -73.9934
+        },
+        "sensors": [
+          {"type": "temperature", "count": 5, "critical_threshold": 45},
+          {"type": "pressure", "count": 4, "critical_threshold": 70},
+          {"type": "flow_rate", "count": 4, "critical_threshold": 2200},
+          {"type": "co2_concentration", "count": 3, "critical_threshold": 600},
+          {"type": "energy_consumption", "count": 2, "critical_threshold": 2500},
+          {"type": "humidity", "count": 1, "critical_threshold": 90},
+          {"type": "vibration", "count": 2, "critical_threshold": 4.0}
+        ]
+      }
+    }
+  },
+  "scenarios": {
+    "normal_operation": {
+      "name": "Normal Operation",
+      "description": "Standard carbon capture operation with typical sensor readings",
+      "duration_minutes": 60,
+      "sensor_anomalies": 0.01,
+      "environmental_conditions": {
+        "temperature_base": 25,
+        "humidity_base": 65,
+        "co2_variation": 50
+      },
+      "system_events": []
+    },
+    "peak_demand": {
+      "name": "Peak Demand Period",
+      "description": "High energy demand period with increased load on capture units",
+      "duration_minutes": 45,
+      "sensor_anomalies": 0.05,
+      "environmental_conditions": {
+        "temperature_base": 30,
+        "humidity_base": 70,
+        "co2_variation": 75
+      },
+      "system_events": [
+        {"time": 5, "type": "load_increase", "description": "Energy demand increased by 40%", "magnitude": 1.4},
+        {"time": 35, "type": "load_decrease", "description": "Energy demand returned to normal", "magnitude": 1.0}
+      ]
+    },
+    "maintenance_window": {
+      "name": "Scheduled Maintenance",
+      "description": "Unit undergoing scheduled maintenance and sensor calibration",
+      "duration_minutes": 90,
+      "sensor_anomalies": 0.08,
+      "environmental_conditions": {
+        "temperature_base": 22,
+        "humidity_base": 60,
+        "co2_variation": 30
+      },
+      "system_events": [
+        {"time": 10, "type": "maintenance_start", "description": "Maintenance window opened", "component": "absorber"},
+        {"time": 45, "type": "sensor_calibration", "description": "CO2 sensors calibrated", "sensor_type": "co2_concentration"},
+        {"time": 75, "type": "maintenance_end", "description": "Maintenance completed", "component": "absorber"}
+      ]
+    },
+    "environmental_stress": {
+      "name": "Environmental Stress Test",
+      "description": "Extreme environmental conditions testing system resilience",
+      "duration_minutes": 30,
+      "sensor_anomalies": 0.12,
+      "environmental_conditions": {
+        "temperature_base": 35,
+        "humidity_base": 85,
+        "co2_variation": 100
+      },
+      "system_events": [
+        {"time": 5, "type": "heat_wave", "description": "Heat wave conditions simulated", "temperature_increase": 10},
+        {"time": 15, "type": "high_humidity", "description": "High humidity event", "humidity_increase": 20},
+        {"time": 25, "type": "recovery", "description": "Environmental conditions normalized"}
+      ]
+    },
+    "system_failure": {
+      "name": "Critical System Failure",
+      "description": "Simulated critical system failure and emergency response",
+      "duration_minutes": 50,
+      "sensor_anomalies": 0.20,
+      "environmental_conditions": {
+        "temperature_base": 28,
+        "humidity_base": 68,
+        "co2_variation": 60
+      },
+      "system_events": [
+        {"time": 8, "type": "pump_failure", "description": "Main circulation pump failure", "severity": "critical"},
+        {"time": 12, "type": "pressure_drop", "description": "System pressure dropped critically", "sensor_type": "pressure"},
+        {"time": 18, "type": "emergency_shutdown", "description": "Emergency shutdown initiated"},
+        {"time": 35, "type": "repair_complete", "description": "Pump repaired and system restarted"},
+        {"time": 45, "type": "system_recovery", "description": "Full system recovery completed"}
+      ]
+    },
+    "efficiency_optimization": {
+      "name": "AI Optimization Test",
+      "description": "Testing AI-driven efficiency optimization algorithms",
+      "duration_minutes": 40,
+      "sensor_anomalies": 0.03,
+      "environmental_conditions": {
+        "temperature_base": 26,
+        "humidity_base": 62,
+        "co2_variation": 40
+      },
+      "system_events": [
+        {"time": 5, "type": "optimization_start", "description": "AI optimization algorithm activated"},
+        {"time": 15, "type": "parameter_adjustment", "description": "Temperature setpoint optimized", "adjustment": -2},
+        {"time": 25, "type": "parameter_adjustment", "description": "Flow rate optimized", "adjustment": 1.1},
+        {"time": 35, "type": "optimization_complete", "description": "Optimization cycle completed", "efficiency_gain": 3.2}
+      ]
+    },
+    "network_disruption": {
+      "name": "Network Connectivity Issues",
+      "description": "Simulated network connectivity problems and data transmission failures",
+      "duration_minutes": 25,
+      "sensor_anomalies": 0.15,
+      "environmental_conditions": {
+        "temperature_base": 24,
+        "humidity_base": 55,
+        "co2_variation": 45
+      },
+      "system_events": [
+        {"time": 3, "type": "network_degradation", "description": "MQTT connection degraded", "packet_loss": 0.3},
+        {"time": 8, "type": "gateway_failure", "description": "Gateway connectivity lost", "gateway_id": "GATEWAY-001"},
+        {"time": 15, "type": "backup_activated", "description": "Backup HTTP communication activated"},
+        {"time": 20, "type": "network_recovery", "description": "Network connectivity restored"}
+      ]
+    }
+  },
+  "performance_metrics": {
+    "target_readings_per_minute": 120,
+    "acceptable_packet_loss": 0.02,
+    "max_response_time_ms": 500,
+    "min_uptime_percentage": 99.5
+  },
+  "alerts_and_monitoring": {
+    "critical_thresholds": {
+      "temperature_max": 50,
+      "pressure_min": 20,
+      "flow_rate_min": 500,
+      "co2_max": 800,
+      "energy_max": 3000
+    },
+    "warning_thresholds": {
+      "temperature_max": 40,
+      "pressure_min": 30,
+      "flow_rate_min": 700,
+      "co2_max": 600,
+      "energy_max": 2000
+    },
+    "alert_cooldown_minutes": 5,
+    "escalation_levels": [
+      {"name": "info", "threshold": 0.7, "notify": false},
+      {"name": "warning", "threshold": 0.8, "notify": true},
+      {"name": "critical", "threshold": 0.9, "notify": true, "escalate": true}
+    ]
+  },
+  "data_management": {
+    "retention_policy": {
+      "sensor_readings_days": 90,
+      "alerts_days": 365,
+      "system_logs_days": 30
+    },
+    "compression": {
+      "enabled": true,
+      "algorithm": "gzip",
+      "threshold_kb": 1024
+    },
+    "backup": {
+      "frequency_hours": 24,
+      "retention_days": 30,
+      "locations": ["local", "cloud"]
+    }
+  }
+}

@@ -1,0 +1,471 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CarbonCaptureUnit",
+  "description": "Schema for carbon capture unit configuration and status",
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "MongoDB ObjectId"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique unit identifier",
+      "pattern": "^CC-\\d{3}$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable unit name",
+      "maxLength": 100
+    },
+    "location": {
+      "type": "object",
+      "description": "Geographic location and address",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "address": {
+          "type": "string",
+          "description": "Street address"
+        },
+        "city": {
+          "type": "string",
+          "description": "City name"
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country code (ISO 3166-1 alpha-2)"
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal or ZIP code"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone identifier"
+        }
+      },
+      "required": ["latitude", "longitude", "city", "country"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["residential", "commercial", "industrial", "utility"],
+      "description": "Type of carbon capture unit"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "maintenance", "offline", "error"],
+      "description": "Current operational status",
+      "default": "active"
+    },
+    "capacity": {
+      "type": "object",
+      "description": "Unit capacity specifications",
+      "properties": {
+        "co2PerDay": {
+          "type": "number",
+          "description": "CO2 capture capacity in tons per day",
+          "minimum": 0
+        },
+        "energyConsumption": {
+          "type": "number",
+          "description": "Energy consumption in kWh per day",
+          "minimum": 0
+        },
+        "efficiency": {
+          "type": "number",
+          "description": "Capture efficiency percentage",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "maxCapacity": {
+          "type": "number",
+          "description": "Maximum capacity in tons per day"
+        },
+        "currentLoad": {
+          "type": "number",
+          "description": "Current load percentage",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 0
+        }
+      },
+      "required": ["co2PerDay", "energyConsumption", "efficiency"]
+    },
+    "sensors": {
+      "type": "array",
+      "description": "List of sensors attached to this unit",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sensorId": {
+            "type": "string",
+            "description": "Sensor identifier"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "temperature",
+              "pressure",
+              "flow_rate",
+              "co2_concentration",
+              "humidity",
+              "air_quality",
+              "energy_consumption",
+              "vibration",
+              "noise_level",
+              "particulate_matter"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "description": "Physical location on unit"
+          },
+          "critical": {
+            "type": "boolean",
+            "description": "Whether sensor is critical for operation",
+            "default": false
+          },
+          "lastReading": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "number" },
+              "timestamp": { "type": "string", "format": "date-time" },
+              "quality": {
+                "type": "string",
+                "enum": ["good", "warning", "critical"]
+              }
+            }
+          }
+        },
+        "required": ["sensorId", "type"]
+      }
+    },
+    "aiOptimization": {
+      "type": "object",
+      "description": "AI optimization configuration and status",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether AI optimization is enabled",
+          "default": true
+        },
+        "currentEfficiency": {
+          "type": "number",
+          "description": "Current AI-optimized efficiency",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "predictedEfficiency": {
+          "type": "number",
+          "description": "Predicted efficiency with optimization",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "optimizationSuggestions": {
+          "type": "array",
+          "description": "Current optimization suggestions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["efficiency", "maintenance", "energy", "configuration"]
+              },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "impact": {
+                "type": "object",
+                "properties": {
+                  "co2Increase": { "type": "number" },
+                  "energySavings": { "type": "number" },
+                  "costSavings": { "type": "number" }
+                }
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending", "implemented", "rejected"]
+              },
+              "createdAt": { "type": "string", "format": "date-time" },
+              "implementedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "predictiveMaintenance": {
+          "type": "array",
+          "description": "Predictive maintenance alerts",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "component": { "type": "string" },
+              "alertType": {
+                "type": "string",
+                "enum": ["warning", "critical", "info"]
+              },
+              "message": { "type": "string" },
+              "probability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "predictedFailureDate": { "type": "string", "format": "date-time" },
+              "recommendedAction": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["active", "resolved", "dismissed"]
+              },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "energyOptimization": {
+          "type": "object",
+          "description": "Energy optimization status",
+          "properties": {
+            "renewableEnergyUsage": {
+              "type": "number",
+              "description": "Percentage of renewable energy used",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "gridEnergyUsage": {
+              "type": "number",
+              "description": "Percentage of grid energy used",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "peakDemandReduction": {
+              "type": "number",
+              "description": "Peak demand reduction in kW"
+            },
+            "costOptimization": {
+              "type": "number",
+              "description": "Cost optimization in $/day"
+            },
+            "carbonFootprint": {
+              "type": "number",
+              "description": "Carbon footprint in kg CO2/day"
+            }
+          }
+        },
+        "lastOptimization": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last optimization run timestamp"
+        },
+        "aiModelVersion": {
+          "type": "string",
+          "description": "Version of AI model being used",
+          "default": "1.0.0"
+        }
+      }
+    },
+    "carbonCredits": {
+      "type": "object",
+      "description": "Carbon credit tracking and status",
+      "properties": {
+        "totalCredits": {
+          "type": "number",
+          "description": "Total credits issued in tons",
+          "minimum": 0,
+          "default": 0
+        },
+        "availableCredits": {
+          "type": "number",
+          "description": "Available credits for trading in tons",
+          "minimum": 0,
+          "default": 0
+        },
+        "retiredCredits": {
+          "type": "number",
+          "description": "Credits that have been retired in tons",
+          "minimum": 0,
+          "default": 0
+        },
+        "creditPrice": {
+          "type": "number",
+          "description": "Current market price per ton in USD",
+          "minimum": 0
+        },
+        "blockchainTxHash": {
+          "type": "string",
+          "description": "Blockchain transaction hash for last credit issuance"
+        },
+        "verificationStatus": {
+          "type": "string",
+          "enum": ["pending", "verified", "rejected"],
+          "description": "Verification status of credits",
+          "default": "pending"
+        },
+        "lastTransaction": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last credit transaction timestamp"
+        }
+      }
+    },
+    "maintenance": {
+      "type": "object",
+      "description": "Maintenance tracking and scheduling",
+      "properties": {
+        "lastMaintenance": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last maintenance date"
+        },
+        "nextScheduledMaintenance": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Next scheduled maintenance date"
+        },
+        "maintenanceHistory": {
+          "type": "array",
+          "description": "History of maintenance activities",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string", "format": "date-time" },
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "technician": { "type": "string" },
+              "parts": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "cost": { "type": "number" },
+              "duration": { "type": "number" }
+            }
+          }
+        },
+        "maintenanceAlerts": {
+          "type": "array",
+          "description": "Active maintenance alerts",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "severity": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              },
+              "message": { "type": "string" },
+              "component": { "type": "string" },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "description": "Performance metrics and analytics",
+      "properties": {
+        "uptime": {
+          "type": "number",
+          "description": "Uptime percentage",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "averageEfficiency": {
+          "type": "number",
+          "description": "Average efficiency over time",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "totalCO2Captured": {
+          "type": "number",
+          "description": "Total CO2 captured in tons",
+          "minimum": 0
+        },
+        "energyIntensity": {
+          "type": "number",
+          "description": "Energy intensity in kWh/ton CO2"
+        },
+        "costPerTon": {
+          "type": "number",
+          "description": "Cost per ton of CO2 captured in USD"
+        },
+        "roi": {
+          "type": "number",
+          "description": "Return on investment percentage"
+        }
+      }
+    },
+    "owner": {
+      "type": "string",
+      "description": "User ID of unit owner"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional unit-specific metadata",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Document creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Document last update timestamp"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "location",
+    "type",
+    "capacity",
+    "owner"
+  ],
+  "indexes": [
+    {
+      "name": "id_unique",
+      "key": { "id": 1 },
+      "unique": true
+    },
+    {
+      "name": "location_2dsphere",
+      "key": { "location": "2dsphere" }
+    },
+    {
+      "name": "status_timestamp",
+      "key": { "status": 1, "updatedAt": -1 }
+    },
+    {
+      "name": "type_location",
+      "key": { "type": 1, "location.country": 1 }
+    },
+    {
+      "name": "owner_status",
+      "key": { "owner": 1, "status": 1 }
+    },
+    {
+      "name": "efficiency_performance",
+      "key": { "capacity.efficiency": -1, "performance.uptime": -1 }
+    },
+    {
+      "name": "maintenance_schedule",
+      "key": { "maintenance.nextScheduledMaintenance": 1 }
+    }
+  ]
+}

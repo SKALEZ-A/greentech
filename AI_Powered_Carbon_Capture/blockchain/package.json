@@ -1,0 +1,65 @@
+{
+  "name": "carbon-capture-blockchain",
+  "version": "1.0.0",
+  "description": "Smart contracts for AI-powered carbon capture and credit trading platform",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:gas": "npx hardhat test --gas",
+    "coverage": "npx hardhat coverage",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:polygon": "npx hardhat run scripts/deploy.js --network polygon",
+    "deploy:mumbai": "npx hardhat run scripts/deploy.js --network mumbai",
+    "verify": "npx hardhat verify",
+    "lint": "npx solhint 'contracts/**/*.sol'",
+    "lint:fix": "npx solhint 'contracts/**/*.sol' --fix",
+    "format": "npx prettier --write 'contracts/**/*.sol'",
+    "size": "npx hardhat size-contracts",
+    "flatten": "npx hardhat flatten"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@openzeppelin/contracts": "^4.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "@typechain/ethers-v5": "^10.2.1",
+    "@typechain/hardhat": "^6.1.6",
+    "@types/chai": "^4.3.6",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.16.19",
+    "chai": "^4.3.7",
+    "dotenv": "^16.3.1",
+    "ethereum-waffle": "^4.0.10",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.14.0",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "prettier": "^2.8.8",
+    "prettier-plugin-solidity": "^1.1.3",
+    "solhint": "^3.4.1",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.3.2",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "blockchain",
+    "carbon",
+    "credits",
+    "climate",
+    "ethereum",
+    "solidity",
+    "nft",
+    "defi"
+  ],
+  "author": "Carbon Capture Network",
+  "license": "MIT"
+}

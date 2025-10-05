@@ -1,0 +1,39 @@
+# Carbon Capture Network Logstash Configuration
+
+# Node settings
+node.name: carbon-capture-logstash
+path.data: /usr/share/logstash/data
+path.logs: /usr/share/logstash/logs
+
+# Pipeline settings
+pipeline.workers: 2
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+
+# Queue settings
+queue.type: persisted
+queue.max_bytes: 1gb
+queue.checkpoint.writes: 1024
+
+# Dead letter queue
+dead_letter_queue.enable: true
+dead_letter_queue.max_bytes: 1gb
+
+# Monitoring API
+http.host: "0.0.0.0"
+http.port: 9600
+
+# Logging
+log.level: info
+log.format: json
+
+# X-Pack monitoring (disabled for demo)
+xpack.monitoring.enabled: false
+xpack.monitoring.elasticsearch.hosts: ["elasticsearch:9200"]
+
+# Security (disabled for demo)
+xpack.security.enabled: false
+
+# Additional settings
+config.reload.automatic: true
+config.reload.interval: 30s

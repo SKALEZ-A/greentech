@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "carbon-capture-network.fullname" . }}-ai-engine
+  labels:
+    app.kubernetes.io/name: {{ include "carbon-capture-network.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ai-engine
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.aiEngine.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "carbon-capture-network.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: ai-engine
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "carbon-capture-network.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: ai-engine
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "carbon-capture-network.serviceAccountName" . }}
+      {{- end }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        runAsNonRoot: {{ .runAsNonRoot }}
+        runAsUser: {{ .runAsUser }}
+        fsGroup: {{ .fsGroup }}
+      {{- end }}
+      containers:
+        - name: ai-engine
+          image: "{{ .Values.aiEngine.image.repository }}:{{ .Values.aiEngine.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.aiEngine.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.aiEngine.service.port }}
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.aiEngine.env.ENVIRONMENT | quote }}
+            - name: MODEL_PATH
+              value: {{ .Values.aiEngine.env.MODEL_PATH | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.aiEngine.env.LOG_LEVEL | quote }}
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "carbon-capture-network.fullname" . }}-redis
+                  key: redis-url
+          {{- with .Values.aiEngine.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          {{- if .Values.aiEngine.volumes.models.enabled }}
+          volumeMounts:
+            - name: models-storage
+              mountPath: /app/models
+          {{- end }}
+      {{- if .Values.aiEngine.volumes.models.enabled }}
+      volumes:
+        - name: models-storage
+          persistentVolumeClaim:
+            claimName: {{ include "carbon-capture-network.fullname" . }}-ai-models
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

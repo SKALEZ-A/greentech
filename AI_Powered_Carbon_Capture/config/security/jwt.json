@@ -1,0 +1,56 @@
+{
+  "jwt": {
+    "algorithm": "HS256",
+    "expiresIn": "24h",
+    "refreshExpiresIn": "7d",
+    "issuer": "carbon-capture-network",
+    "audience": "carbon-capture-api",
+    "secretRotation": {
+      "enabled": true,
+      "intervalDays": 30,
+      "gracePeriodHours": 24
+    },
+    "blacklist": {
+      "enabled": true,
+      "redisPrefix": "jwt:blacklist:",
+      "ttl": 86400
+    },
+    "claims": {
+      "required": ["sub", "iat", "exp", "iss", "aud"],
+      "custom": {
+        "role": "user_role",
+        "permissions": "user_permissions",
+        "organization": "org_id",
+        "sessionId": "session_id"
+      }
+    },
+    "validation": {
+      "clockTolerance": 30,
+      "maxAge": "24h",
+      "ignoreExpiration": false,
+      "ignoreNotBefore": false
+    }
+  },
+  "session": {
+    "cookieName": "carbon_capture_session",
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "strict",
+    "maxAge": 86400000,
+    "rolling": true,
+    "resave": false,
+    "saveUninitialized": false
+  },
+  "twoFactor": {
+    "enabled": true,
+    "issuer": "Carbon Capture Network",
+    "algorithm": "SHA1",
+    "digits": 6,
+    "step": 30,
+    "window": 1,
+    "backupCodes": {
+      "count": 10,
+      "length": 8
+    }
+  }
+}

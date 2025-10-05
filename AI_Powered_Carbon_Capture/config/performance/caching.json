@@ -1,0 +1,149 @@
+{
+  "caching": {
+    "strategy": {
+      "type": "multi-level",
+      "levels": ["memory", "redis", "cdn"],
+      "fallback": true
+    },
+    "memory": {
+      "enabled": true,
+      "maxSize": 1000,
+      "ttl": 300,
+      "compression": false,
+      "evictionPolicy": "lru"
+    },
+    "redis": {
+      "enabled": true,
+      "ttl": 3600,
+      "compression": true,
+      "keyPrefix": "ccn:cache:",
+      "cluster": {
+        "enabled": false,
+        "nodes": []
+      }
+    },
+    "policies": {
+      "sensorData": {
+        "ttl": 60,
+        "strategy": "write-through",
+        "invalidation": "time-based"
+      },
+      "unitData": {
+        "ttl": 300,
+        "strategy": "write-through",
+        "invalidation": "event-based"
+      },
+      "aiPredictions": {
+        "ttl": 1800,
+        "strategy": "write-back",
+        "invalidation": "manual"
+      },
+      "userData": {
+        "ttl": 3600,
+        "strategy": "write-through",
+        "invalidation": "event-based"
+      },
+      "staticAssets": {
+        "ttl": 86400,
+        "strategy": "cache-aside",
+        "invalidation": "version-based"
+      }
+    },
+    "invalidation": {
+      "events": {
+        "sensor_update": ["sensor:*"],
+        "unit_status_change": ["unit:*"],
+        "ai_model_update": ["ai:*"],
+        "user_profile_update": ["user:*"]
+      },
+      "patterns": {
+        "sensor:*": "immediate",
+        "unit:*": "immediate",
+        "ai:*": "delayed",
+        "user:*": "immediate"
+      }
+    },
+    "warmup": {
+      "enabled": true,
+      "schedule": "0 */4 * * *",
+      "data": [
+        {
+          "key": "system:units:active",
+          "ttl": 3600
+        },
+        {
+          "key": "system:sensors:count",
+          "ttl": 1800
+        },
+        {
+          "key": "ai:models:available",
+          "ttl": 7200
+        }
+      ]
+    },
+    "monitoring": {
+      "hitRate": true,
+      "missRate": true,
+      "evictionRate": true,
+      "memoryUsage": true,
+      "alerts": {
+        "lowHitRate": 0.7,
+        "highMemoryUsage": 0.85,
+        "highEvictionRate": 0.1
+      }
+    }
+  },
+  "cdn": {
+    "enabled": true,
+    "provider": "cloudflare",
+    "ttl": 86400,
+    "compression": true,
+    "regions": ["us-east-1", "eu-west-1", "ap-southeast-1"],
+    "cacheRules": {
+      "/api/v1/sensor-data": {
+        "ttl": 60,
+        "staleWhileRevalidate": 300
+      },
+      "/api/v1/units": {
+        "ttl": 300,
+        "staleWhileRevalidate": 600
+      },
+      "/static/*": {
+        "ttl": 86400,
+        "immutable": true
+      }
+    }
+  },
+  "optimization": {
+    "compression": {
+      "enabled": true,
+      "algorithm": "gzip",
+      "level": 6,
+      "threshold": 1024
+    },
+    "minification": {
+      "enabled": true,
+      "css": true,
+      "js": true,
+      "html": false
+    },
+    "bundling": {
+      "enabled": true,
+      "strategy": "code-splitting",
+      "chunks": {
+        "vendor": ["react", "react-dom", "@mui/material"],
+        "ai": ["axios", "recharts"],
+        "utils": ["lodash", "moment"]
+      }
+    },
+    "preload": {
+      "enabled": true,
+      "resources": [
+        "/api/v1/system/health",
+        "/api/v1/units/summary",
+        "/static/css/main.css",
+        "/static/js/main.js"
+      ]
+    }
+  }
+}

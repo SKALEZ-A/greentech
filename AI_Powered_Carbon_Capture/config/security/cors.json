@@ -1,0 +1,37 @@
+{
+  "cors": {
+    "origin": [
+      "https://carboncapture.network",
+      "https://api.carboncapture.network",
+      "https://dashboard.carboncapture.network",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:8000"
+    ],
+    "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    "allowedHeaders": [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-API-Key",
+      "X-Request-ID",
+      "X-Correlation-ID"
+    ],
+    "exposedHeaders": [
+      "X-Total-Count",
+      "X-Rate-Limit-Remaining",
+      "X-Rate-Limit-Reset"
+    ],
+    "credentials": true,
+    "maxAge": 86400,
+    "optionsSuccessStatus": 200
+  },
+  "trustedProxies": [
+    "127.0.0.1",
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16"
+  ]
+}

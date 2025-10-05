@@ -1,0 +1,347 @@
+# Default values for carbon-capture-network
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  domain: carboncapture.network
+  environment: production
+
+# Application images
+images:
+  backend:
+    repository: carboncapture/backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: carboncapture/frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  aiEngine:
+    repository: carboncapture/ai-engine
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  iotSimulation:
+    repository: carboncapture/iot-simulation
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+# Backend service configuration
+backend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: carboncapture/backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3001
+    annotations: {}
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  env:
+    NODE_ENV: production
+    PORT: "3001"
+    MONGODB_URI: "mongodb://mongodb:27017/carbon_capture_prod"
+    REDIS_URL: "redis://redis:6379"
+    JWT_SECRET: "change-this-in-production"
+    AI_ENGINE_URL: "http://ai-engine:8000"
+  configmaps:
+    cors: |
+      {
+        "origin": ["https://{{ .Values.global.domain }}"],
+        "credentials": true
+      }
+  secrets:
+    jwt:
+      secret: "change-this-in-production"
+    database:
+      mongodbRootUsername: "admin"
+      mongodbRootPassword: "change-this-in-production"
+      redisPassword: "change-this-in-production"
+
+# Frontend service configuration
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: carboncapture/frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  env:
+    NEXT_PUBLIC_API_URL: "https://api.{{ .Values.global.domain }}"
+    NEXT_PUBLIC_WS_URL: "wss://api.{{ .Values.global.domain }}"
+
+# AI Engine service configuration
+aiEngine:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: carboncapture/ai-engine
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+  env:
+    ENVIRONMENT: production
+    MODEL_PATH: "/app/models"
+    LOG_LEVEL: "INFO"
+  volumes:
+    models:
+      enabled: true
+      size: 50Gi
+      accessMode: ReadWriteOnce
+
+# IoT Simulation service configuration
+iotSimulation:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: carboncapture/iot-simulation
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+  env:
+    BACKEND_URL: "http://backend:3001"
+    MQTT_BROKER: "mqtt://mosquitto:1883"
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  architecture: standalone
+  auth:
+    rootPassword: "change-this-in-production"
+  persistence:
+    enabled: true
+    size: 50Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+# Redis configuration
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    password: "change-this-in-production"
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# Mosquitto MQTT Broker
+mosquitto:
+  enabled: true
+  image:
+    repository: eclipse-mosquitto
+    tag: "2.0"
+  service:
+    type: ClusterIP
+    ports:
+      mqtt: 1883
+      websockets: 8883
+  persistence:
+    enabled: true
+    size: 5Gi
+  config: |
+    listener 1883
+    protocol mqtt
+    listener 8883
+    protocol websockets
+    allow_anonymous false
+    password_file /mosquitto/config/password.txt
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Prometheus monitoring
+prometheus:
+  enabled: true
+  server:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+
+# Grafana visualization
+grafana:
+  enabled: true
+  adminPassword: "change-this-in-production"
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# Elasticsearch for logging
+elasticsearch:
+  enabled: true
+  replicas: 1
+  minimumMasterNodes: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  volumeClaimTemplate:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 30Gi
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: "{{ .Values.global.domain }}"
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend
+              port:
+                number: 3000
+    - host: "api.{{ .Values.global.domain }}"
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: backend
+              port:
+                number: 3001
+  tls:
+    - secretName: carbon-capture-tls
+      hosts:
+        - "{{ .Values.global.domain }}"
+        - "api.{{ .Values.global.domain }}"
+
+# Certificate manager
+certManager:
+  enabled: true
+  issuer:
+    name: letsencrypt-prod
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@carboncapture.network
+
+# Horizontal Pod Autoscaling
+autoscaling:
+  backend:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  aiEngine:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 85
+
+# Pod Disruption Budgets
+podDisruptionBudget:
+  backend:
+    enabled: true
+    minAvailable: 1
+  aiEngine:
+    enabled: true
+    minAvailable: 1
+  frontend:
+    enabled: true
+    minAvailable: 1
+
+# Network policies
+networkPolicy:
+  enabled: true
+  defaultDenyAll: true
+
+# Security context
+securityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 101
+  fsGroup: 101
+
+# Service accounts
+serviceAccount:
+  create: true
+  annotations: {}
+  name: carbon-capture-sa
+
+# Node selectors and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}

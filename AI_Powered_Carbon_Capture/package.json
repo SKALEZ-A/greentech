@@ -1,0 +1,85 @@
+{
+  "name": "ai-powered-carbon-capture-network",
+  "version": "1.0.0",
+  "description": "An intelligent, distributed carbon capture and storage network that uses AI optimization to maximize CO2 removal efficiency and create scalable climate solutions",
+  "main": "backend/src/index.js",
+  "scripts": {
+    "install:all": "npm run install:frontend && npm run install:backend && npm run install:ai && npm run install:blockchain",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && npm install",
+    "install:ai": "cd ai-engine && pip install -r requirements.txt",
+    "install:blockchain": "cd blockchain && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:ai\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:ai": "cd ai-engine && python src/main.py",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend && npm run test:ai",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:ai": "cd ai-engine && python -m pytest tests/",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "deploy": "npm run build && npm run docker:build && npm run docker:up"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "blockchain"
+  ],
+  "keywords": [
+    "carbon-capture",
+    "climate-tech",
+    "ai-optimization",
+    "blockchain",
+    "iot",
+    "renewable-energy",
+    "sustainability",
+    "direct-air-capture",
+    "co2-removal",
+    "green-technology"
+  ],
+  "author": "Carbon Capture Network Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/ai-powered-carbon-capture-network.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/ai-powered-carbon-capture-network/issues"
+  },
+  "homepage": "https://carboncapture.network",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "python": ">=3.9.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.2.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.45.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{py}": [
+      "black",
+      "isort"
+    ]
+  }
+}

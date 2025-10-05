@@ -1,0 +1,550 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Security and Quality Checks
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Backend Testing and Building
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run backend linting
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test -- --coverage --watchAll=false
+        env:
+          MONGODB_URI: mongodb://localhost:27017/carbon_capture_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret
+          NODE_ENV: test
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+
+      - name: Build backend Docker image
+        run: |
+          cd backend
+          docker build -f Dockerfile.prod -t backend:${{ github.sha }} .
+
+  # AI Engine Testing and Building
+  ai-engine:
+    name: AI Engine CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('ai-engine/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install AI Engine dependencies
+        run: |
+          cd ai-engine
+          pip install -r requirements.txt
+
+      - name: Run AI Engine linting
+        run: |
+          cd ai-engine
+          pip install flake8 black isort
+          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          black --check src
+          isort --check-only src
+
+      - name: Run AI Engine tests
+        run: |
+          cd ai-engine
+          pip install pytest pytest-cov
+          pytest --cov=src --cov-report=xml
+        env:
+          PYTHONPATH: src
+
+      - name: Upload AI Engine coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./ai-engine/coverage.xml
+          flags: ai-engine
+          name: ai-engine-coverage
+
+      - name: Build AI Engine Docker image
+        run: |
+          cd ai-engine
+          docker build -f Dockerfile.prod -t ai-engine:${{ github.sha }} .
+
+  # Frontend Testing and Building
+  frontend:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run frontend linting
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run frontend type checking
+        run: |
+          cd frontend
+          npm run type-check
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test -- --coverage --watchAll=false --passWithNoTests
+        env:
+          CI: true
+
+      - name: Upload frontend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Build frontend Docker image
+        run: |
+          cd frontend
+          docker build -f Dockerfile.prod -t frontend:${{ github.sha }} .
+
+  # IoT Simulation Testing
+  iot-simulation:
+    name: IoT Simulation CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install IoT Simulation dependencies
+        run: |
+          cd iot-simulation
+          pip install -r requirements.txt
+
+      - name: Run IoT Simulation tests
+        run: |
+          cd iot-simulation
+          pip install pytest pytest-cov
+          pytest --cov=src --cov-report=xml
+
+      - name: Build IoT Simulation Docker image
+        run: |
+          cd iot-simulation
+          docker build -t iot-simulation:${{ github.sha }} .
+
+  # Blockchain Testing
+  blockchain:
+    name: Blockchain CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: blockchain/package-lock.json
+
+      - name: Install blockchain dependencies
+        run: |
+          cd blockchain
+          npm ci
+
+      - name: Compile smart contracts
+        run: |
+          cd blockchain
+          npx hardhat compile
+
+      - name: Run blockchain tests
+        run: |
+          cd blockchain
+          npx hardhat test
+        env:
+          NETWORK: hardhat
+
+  # Integration Testing
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [backend, ai-engine, frontend]
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          MONGODB_URI: mongodb://localhost:27017/carbon_capture_integration
+          REDIS_URL: redis://localhost:6379
+          AI_ENGINE_URL: http://localhost:8000
+
+  # Performance Testing
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [backend, ai-engine]
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run performance tests
+        run: npm run test:performance
+        env:
+          MONGODB_URI: mongodb://localhost:27017/carbon_capture_performance
+          REDIS_URL: redis://localhost:6379
+
+  # Docker Image Building and Pushing
+  build-and-push:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    needs: [backend, ai-engine, frontend, iot-simulation, blockchain, integration]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.prod
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push AI Engine image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-engine
+          file: ./ai-engine/Dockerfile.prod
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/ai-engine:${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push IoT Simulation image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./iot-simulation
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/iot-simulation:${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # Deployment to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to EKS staging
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name carbon-capture-staging
+          helm upgrade --install carbon-capture-staging ./deployment/helm \
+            --namespace staging \
+            --set global.environment=staging \
+            --set backend.image.tag=${{ github.sha }} \
+            --set aiEngine.image.tag=${{ github.sha }} \
+            --set frontend.image.tag=${{ github.sha }} \
+            --wait
+
+  # Deployment to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, performance]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to EKS production
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name carbon-capture-prod
+          helm upgrade --install carbon-capture-prod ./deployment/helm \
+            --namespace production \
+            --set global.environment=production \
+            --set backend.image.tag=${{ github.sha }} \
+            --set aiEngine.image.tag=${{ github.sha }} \
+            --set frontend.image.tag=${{ github.sha }} \
+            --wait
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment to be ready
+          kubectl wait --for=condition=available --timeout=300s deployment/carbon-capture-prod-backend -n production
+          kubectl wait --for=condition=available --timeout=300s deployment/carbon-capture-prod-frontend -n production
+          kubectl wait --for=condition=available --timeout=300s deployment/carbon-capture-prod-ai-engine -n production
+
+          # Run smoke tests
+          npm run test:smoke
+
+  # Security Testing
+  security-testing:
+    name: Security Testing
+    runs-on: ubuntu-latest
+    needs: [backend, ai-engine]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run SAST (Static Application Security Testing)
+        uses: github/super-linter/slim@v5
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run dependency vulnerability scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=backend/package.json
+
+      - name: Run Python security scan
+        uses: snyk/actions/python@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=ai-engine/requirements.txt
+
+  # Code Quality Gates
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [backend, ai-engine, frontend, integration]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Quality Gate Check
+        run: |
+          # Check if all required jobs passed
+          if [[ "${{ needs.backend.result }}" != "success" ]]; then
+            echo "Backend tests failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.ai-engine.result }}" != "success" ]]; then
+            echo "AI Engine tests failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.frontend.result }}" != "success" ]]; then
+            echo "Frontend tests failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.integration.result }}" != "success" ]]; then
+            echo "Integration tests failed"
+            exit 1
+          fi
+
+          echo "All quality checks passed!"
+
+      - name: Create deployment notification
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          curl -X POST \
+            ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-type: application/json' \
+            -d '{
+              "text": "🚀 Carbon Capture Network deployed to production!\nCommit: ${{ github.sha }}\nEnvironment: Production"
+            }'

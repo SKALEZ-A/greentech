@@ -1,0 +1,4 @@
+boto3==1.28.57
+redis==4.6.0
+pymongo==4.5.0
+python-dotenv==1.0.0

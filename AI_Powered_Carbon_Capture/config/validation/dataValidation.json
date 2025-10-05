@@ -1,0 +1,292 @@
+{
+  "dataValidation": {
+    "sensorData": {
+      "schema": {
+        "type": "object",
+        "required": ["sensor_id", "sensor_type", "unit_id", "value", "timestamp"],
+        "properties": {
+          "sensor_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9\\-_]{3,50}$"
+          },
+          "sensor_type": {
+            "type": "string",
+            "enum": ["temperature", "pressure", "flow_rate", "co2_concentration", "energy_consumption", "humidity", "vibration", "motor_current", "ph_level", "conductivity"]
+          },
+          "unit_id": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{24}$"
+          },
+          "value": {
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000000
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "quality": {
+            "type": "string",
+            "enum": ["good", "fair", "poor"],
+            "default": "good"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "reading_number": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "calibration_drift": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "is_anomaly": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "businessRules": {
+        "value_ranges": {
+          "temperature": {"min": -50, "max": 150, "unit": "celsius"},
+          "pressure": {"min": 0, "max": 200, "unit": "psi"},
+          "flow_rate": {"min": 0, "max": 5000, "unit": "l_min"},
+          "co2_concentration": {"min": 0, "max": 100, "unit": "percentage"},
+          "energy_consumption": {"min": 0, "max": 10000, "unit": "kw"},
+          "humidity": {"min": 0, "max": 100, "unit": "percentage"},
+          "vibration": {"min": 0, "max": 10, "unit": "mm_s"},
+          "motor_current": {"min": 0, "max": 50, "unit": "ampere"},
+          "ph_level": {"min": 0, "max": 14, "unit": "ph"},
+          "conductivity": {"min": 0, "max": 10000, "unit": "us_cm"}
+        },
+        "anomaly_detection": {
+          "z_score_threshold": 3.0,
+          "iqr_multiplier": 1.5,
+          "moving_average_window": 10,
+          "trend_analysis_period": 60
+        },
+        "data_quality_checks": {
+          "null_check": true,
+          "range_check": true,
+          "consistency_check": true,
+          "temporal_consistency": true,
+          "duplicate_check": {
+            "enabled": true,
+            "time_window_minutes": 5
+          }
+        }
+      }
+    },
+    "unitData": {
+      "schema": {
+        "type": "object",
+        "required": ["name", "type", "capacity_tons_per_day", "location"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "type": {
+            "type": "string",
+            "enum": ["direct_air_capture", "flue_gas_capture", "industrial_process", "biomass_capture"]
+          },
+          "capacity_tons_per_day": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "location": {
+            "type": "object",
+            "required": ["latitude", "longitude"],
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "longitude": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "address": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "elevation": {
+                "type": "number",
+                "minimum": -500,
+                "maximum": 9000
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["operational", "maintenance", "offline", "error"],
+            "default": "operational"
+          },
+          "efficiency": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "businessRules": {
+        "operational_limits": {
+          "max_downtime_hours": 24,
+          "min_efficiency_threshold": 50,
+          "max_temperature_celsius": 80,
+          "maintenance_interval_days": 90
+        },
+        "geographic_validation": {
+          "allowed_countries": ["US", "CA", "GB", "DE", "JP", "AU"],
+          "min_distance_between_units_km": 1,
+          "max_elevation_m": 3000
+        }
+      }
+    },
+    "aiPrediction": {
+      "schema": {
+        "type": "object",
+        "required": ["model_type", "input_data", "prediction", "confidence"],
+        "properties": {
+          "model_type": {
+            "type": "string",
+            "enum": ["efficiency", "maintenance", "energy", "optimization"]
+          },
+          "input_data": {
+            "type": "object"
+          },
+          "prediction": {
+            "type": "object",
+            "properties": {
+              "value": {"type": "number"},
+              "unit": {"type": "string"},
+              "range": {
+                "type": "object",
+                "properties": {
+                  "min": {"type": "number"},
+                  "max": {"type": "number"}
+                }
+              }
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "model_version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "feature_importance": {
+            "type": "object",
+            "patternProperties": {
+              ".*": {"type": "number"}
+            }
+          }
+        }
+      },
+      "businessRules": {
+        "confidence_thresholds": {
+          "high": 0.8,
+          "medium": 0.6,
+          "low": 0.4
+        },
+        "prediction_validation": {
+          "max_deviation_from_baseline": 0.5,
+          "historical_accuracy_check": true,
+          "cross_validation_required": true
+        }
+      }
+    },
+    "carbonCredit": {
+      "schema": {
+        "type": "object",
+        "required": ["project_name", "amount_total", "vintage_year", "methodology"],
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "amount_total": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "vintage_year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2050
+          },
+          "methodology": {
+            "type": "string",
+            "enum": ["direct_air_capture", "industrial_capture", "biomass_capture", "nature_based", "renewable_energy"]
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "verification_standard": {
+            "type": "string",
+            "enum": ["verra", "gold_standard", "american_carbon_registry", "climate_action_reserve"]
+          },
+          "retirement_status": {
+            "type": "string",
+            "enum": ["active", "retired", "cancelled"],
+            "default": "active"
+          }
+        }
+      },
+      "businessRules": {
+        "additionality": {
+          "required": true,
+          "criteria": ["technological", "financial", "regulatory"]
+        },
+        "permanence": {
+          "min_years": 100,
+          "buffer_required": true,
+          "buffer_percentage": 0.2
+        },
+        "verification": {
+          "third_party_required": true,
+          "annual_audit_required": true,
+          "chain_of_custody_tracked": true
+        }
+      }
+    }
+  },
+  "validationEngine": {
+    "strictMode": true,
+    "failFast": false,
+    "collectAllErrors": true,
+    "customValidators": {
+      "sensorValueRange": true,
+      "geographicConstraints": true,
+      "temporalConsistency": true,
+      "businessLogicValidation": true
+    },
+    "errorReporting": {
+      "detailedErrors": true,
+      "errorCodes": true,
+      "suggestions": true,
+      "fixActions": true
+    }
+  }
+}

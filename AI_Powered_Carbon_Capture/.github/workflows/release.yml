@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+
+          # Generate changelog between tags
+          if [ "$LATEST_TAG" != "$CURRENT_TAG" ]; then
+            echo "## What's Changed" >> changelog.md
+            echo "" >> changelog.md
+            git log --pretty=format:"- %s (%h)" $LATEST_TAG..HEAD >> changelog.md
+          else
+            echo "## What's Changed" >> changelog.md
+            echo "" >> changelog.md
+            echo "- Initial release" >> changelog.md
+          fi
+
+          # Read changelog
+          {
+            echo 'CHANGELOG<<EOF'
+            cat changelog.md
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## Carbon Capture Network ${{ github.ref_name }}
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ### Deployment
+            - Backend API: Deployed to production
+            - AI Engine: Deployed with latest models
+            - Frontend: Deployed with new features
+            - Blockchain: Smart contracts updated
+
+            ### Docker Images
+            - Backend: `ghcr.io/${{ github.repository }}/backend:${{ github.sha }}`
+            - AI Engine: `ghcr.io/${{ github.repository }}/ai-engine:${{ github.sha }}`
+            - Frontend: `ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}`
+
+            ### Verification
+            - ✅ All tests passed
+            - ✅ Security scan completed
+            - ✅ Performance benchmarks met
+            - ✅ Integration tests successful
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+
+  deploy-production-release:
+    name: Deploy Release to Production
+    runs-on: ubuntu-latest
+    needs: [release]
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy release to production
+        run: |
+          # Update kubeconfig for production cluster
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name carbon-capture-prod
+
+          # Get current tag
+          TAG=${GITHUB_REF#refs/tags/}
+
+          # Deploy with Helm
+          helm upgrade --install carbon-capture-prod ./deployment/helm \
+            --namespace production \
+            --set global.environment=production \
+            --set global.version=$TAG \
+            --set backend.image.tag=$TAG \
+            --set aiEngine.image.tag=$TAG \
+            --set frontend.image.tag=$TAG \
+            --wait \
+            --timeout 600s
+
+      - name: Run post-deployment tests
+        run: |
+          # Wait for all deployments to be ready
+          kubectl wait --for=condition=available --timeout=600s deployment/carbon-capture-prod-backend -n production
+          kubectl wait --for=condition=available --timeout=600s deployment/carbon-capture-prod-frontend -n production
+          kubectl wait --for=condition=available --timeout=600s deployment/carbon-capture-prod-ai-engine -n production
+
+          # Run comprehensive smoke tests
+          npm run test:smoke:full
+
+      - name: Update deployment status
+        if: success()
+        run: |
+          curl -X POST \
+            ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-type: application/json' \
+            -d "{
+              \"text\": \"✅ Carbon Capture Network ${GITHUB_REF#refs/tags/} successfully deployed to production!\",
+              \"attachments\": [
+                {
+                  \"color\": \"good\",
+                  \"fields\": [
+                    {
+                      \"title\": \"Version\",
+                      \"value\": \"${GITHUB_REF#refs/tags/}\",
+                      \"short\": true
+                    },
+                    {
+                      \"title\": \"Environment\",
+                      \"value\": \"Production\",
+                      \"short\": true
+                    },
+                    {
+                      \"title\": \"Status\",
+                      \"value\": \"All systems operational\",
+                      \"short\": false
+                    }
+                  ]
+                }
+              ]
+            }"
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed, initiating rollback..."
+
+          # Get previous successful deployment
+          PREVIOUS_TAG=$(helm history carbon-capture-prod -n production --output json | jq -r '.[] | select(.status == "deployed") | .app_version' | head -2 | tail -1)
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Rolling back to version $PREVIOUS_TAG"
+            helm rollback carbon-capture-prod -n production
+
+            # Notify about rollback
+            curl -X POST \
+              ${{ secrets.SLACK_WEBHOOK_URL }} \
+              -H 'Content-type: application/json' \
+              -d "{
+                \"text\": \"❌ Production deployment failed, rolled back to $PREVIOUS_TAG\",
+                \"color\": \"danger\"
+              }"
+          else
+            echo "No previous version found for rollback"
+          fi

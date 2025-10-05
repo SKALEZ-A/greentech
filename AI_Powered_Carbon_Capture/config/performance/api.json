@@ -1,0 +1,240 @@
+{
+  "api": {
+    "rateLimiting": {
+      "enabled": true,
+      "global": {
+        "windowMs": 900000,
+        "max": 1000,
+        "message": "Too many requests from this IP, please try again later."
+      },
+      "endpoints": {
+        "/api/v1/sensor-data": {
+          "windowMs": 60000,
+          "max": 100
+        },
+        "/api/v1/ai/optimize": {
+          "windowMs": 300000,
+          "max": 10
+        },
+        "/api/v1/auth/login": {
+          "windowMs": 900000,
+          "max": 5
+        },
+        "/api/v1/carbon-credits/trade": {
+          "windowMs": 60000,
+          "max": 20
+        }
+      },
+      "userTiers": {
+        "free": {
+          "requestsPerHour": 100,
+          "burstLimit": 10
+        },
+        "basic": {
+          "requestsPerHour": 1000,
+          "burstLimit": 50
+        },
+        "premium": {
+          "requestsPerHour": 10000,
+          "burstLimit": 200
+        },
+        "enterprise": {
+          "requestsPerHour": 100000,
+          "burstLimit": 1000
+        }
+      }
+    },
+    "circuitBreaker": {
+      "enabled": true,
+      "failureThreshold": 5,
+      "recoveryTimeout": 60000,
+      "monitoringPeriod": 10000,
+      "services": {
+        "ai-engine": {
+          "failureThreshold": 3,
+          "recoveryTimeout": 30000
+        },
+        "database": {
+          "failureThreshold": 5,
+          "recoveryTimeout": 10000
+        },
+        "blockchain": {
+          "failureThreshold": 2,
+          "recoveryTimeout": 120000
+        }
+      }
+    },
+    "loadBalancing": {
+      "algorithm": "round-robin",
+      "healthChecks": {
+        "enabled": true,
+        "interval": 30000,
+        "timeout": 5000,
+        "unhealthyThreshold": 3,
+        "healthyThreshold": 2
+      },
+      "stickySessions": false,
+      "sessionAffinity": "none"
+    },
+    "compression": {
+      "enabled": true,
+      "algorithms": ["gzip", "deflate", "br"],
+      "level": 6,
+      "threshold": 1024,
+      "mimeTypes": [
+        "text/plain",
+        "text/css",
+        "text/xml",
+        "text/javascript",
+        "application/javascript",
+        "application/json",
+        "application/xml",
+        "application/rss+xml"
+      ]
+    },
+    "caching": {
+      "enabled": true,
+      "defaultTTL": 300,
+      "headers": {
+        "cache-control": "public, max-age=300",
+        "etag": true,
+        "last-modified": true
+      },
+      "endpoints": {
+        "GET /api/v1/units": {
+          "ttl": 300,
+          "vary": ["Accept-Encoding"]
+        },
+        "GET /api/v1/sensor-data": {
+          "ttl": 60,
+          "vary": ["Accept-Encoding", "X-API-Key"]
+        },
+        "GET /api/v1/system/health": {
+          "ttl": 30,
+          "cache-control": "public, max-age=30, s-maxage=60"
+        }
+      }
+    },
+    "pagination": {
+      "defaultLimit": 50,
+      "maxLimit": 1000,
+      "cursorBased": true,
+      "tokenEncryption": true
+    },
+    "batchRequests": {
+      "enabled": true,
+      "maxRequests": 20,
+      "timeout": 30000
+    },
+    "responseOptimization": {
+      "jsonMinification": true,
+      "removeNullFields": false,
+      "fieldSelection": true,
+      "graphQL": {
+        "enabled": false,
+        "endpoint": "/api/v1/graphql"
+      }
+    },
+    "monitoring": {
+      "enabled": true,
+      "metrics": {
+        "responseTime": true,
+        "errorRate": true,
+        "throughput": true,
+        "latency": {
+          "p50": true,
+          "p95": true,
+          "p99": true
+        }
+      },
+      "alerts": {
+        "slowResponseTime": 5000,
+        "highErrorRate": 0.05,
+        "lowThroughput": 10
+      },
+      "logging": {
+        "slowQueries": true,
+        "threshold": 1000,
+        "includeHeaders": false,
+        "includeBody": false
+      }
+    },
+    "security": {
+      "helmet": {
+        "contentSecurityPolicy": true,
+        "dnsPrefetchControl": true,
+        "expectCt": true,
+        "frameguard": true,
+        "hidePoweredBy": true,
+        "hsts": true,
+        "ieNoOpen": true,
+        "noSniff": true,
+        "referrerPolicy": true,
+        "xssFilter": true
+      },
+      "cors": {
+        "origin": true,
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "allowedHeaders": ["Content-Type", "Authorization", "X-API-Key"],
+        "credentials": true,
+        "maxAge": 86400
+      }
+    }
+  },
+  "middleware": {
+    "order": [
+      "cors",
+      "helmet",
+      "rateLimit",
+      "compression",
+      "bodyParser",
+      "authentication",
+      "authorization",
+      "validation",
+      "caching",
+      "logging",
+      "errorHandler"
+    ],
+    "async": true,
+    "errorHandling": {
+      "catchAsyncErrors": true,
+      "logErrors": true,
+      "returnErrorDetails": false
+    }
+  },
+  "webhooks": {
+    "enabled": true,
+    "retryPolicy": {
+      "maxRetries": 3,
+      "backoffMultiplier": 2,
+      "initialDelay": 1000,
+      "maxDelay": 30000
+    },
+    "security": {
+      "signatureVerification": true,
+      "allowedIPs": [],
+      "rateLimit": {
+        "windowMs": 60000,
+        "max": 100
+      }
+    },
+    "events": {
+      "sensor_alert": {
+        "url": "{{WEBHOOK_URL}}/sensor-alert",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Webhook-Token": "{{WEBHOOK_TOKEN}}"
+        }
+      },
+      "ai_optimization": {
+        "url": "{{WEBHOOK_URL}}/ai-optimization",
+        "method": "POST"
+      },
+      "carbon_credit_trade": {
+        "url": "{{WEBHOOK_URL}}/carbon-credit-trade",
+        "method": "POST"
+      }
+    }
+  }
+}

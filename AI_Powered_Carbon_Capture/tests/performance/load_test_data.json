@@ -1,0 +1,463 @@
+[
+  {
+    "test_id": "load_test_001",
+    "description": "High-frequency sensor data ingestion test",
+    "duration_seconds": 300,
+    "concurrent_users": 100,
+    "requests_per_second": 1000,
+    "test_data": {
+      "units": [
+        {
+          "unit_id": "CC-001",
+          "sensors": [
+            {"sensor_id": "CC-001_temp_01", "type": "temperature", "frequency": 10},
+            {"sensor_id": "CC-001_pressure_01", "type": "pressure", "frequency": 10},
+            {"sensor_id": "CC-001_flow_01", "type": "flow_rate", "frequency": 5},
+            {"sensor_id": "CC-001_co2_01", "type": "co2_concentration", "frequency": 30},
+            {"sensor_id": "CC-001_humidity_01", "type": "humidity", "frequency": 60},
+            {"sensor_id": "CC-001_energy_01", "type": "energy_consumption", "frequency": 300}
+          ]
+        },
+        {
+          "unit_id": "CC-002",
+          "sensors": [
+            {"sensor_id": "CC-002_temp_01", "type": "temperature", "frequency": 10},
+            {"sensor_id": "CC-002_pressure_01", "type": "pressure", "frequency": 10},
+            {"sensor_id": "CC-002_flow_01", "type": "flow_rate", "frequency": 5},
+            {"sensor_id": "CC-002_co2_01", "type": "co2_concentration", "frequency": 30},
+            {"sensor_id": "CC-002_humidity_01", "type": "humidity", "frequency": 60},
+            {"sensor_id": "CC-002_energy_01", "type": "energy_consumption", "frequency": 300}
+          ]
+        },
+        {
+          "unit_id": "CC-003",
+          "sensors": [
+            {"sensor_id": "CC-003_temp_01", "type": "temperature", "frequency": 10},
+            {"sensor_id": "CC-003_pressure_01", "type": "pressure", "frequency": 10},
+            {"sensor_id": "CC-003_flow_01", "type": "flow_rate", "frequency": 5},
+            {"sensor_id": "CC-003_co2_01", "type": "co2_concentration", "frequency": 30},
+            {"sensor_id": "CC-003_humidity_01", "type": "humidity", "frequency": 60},
+            {"sensor_id": "CC-003_energy_01", "type": "energy_consumption", "frequency": 300}
+          ]
+        },
+        {
+          "unit_id": "CC-004",
+          "sensors": [
+            {"sensor_id": "CC-004_temp_01", "type": "temperature", "frequency": 10},
+            {"sensor_id": "CC-004_pressure_01", "type": "pressure", "frequency": 10},
+            {"sensor_id": "CC-004_flow_01", "type": "flow_rate", "frequency": 5},
+            {"sensor_id": "CC-004_co2_01", "type": "co2_concentration", "frequency": 30},
+            {"sensor_id": "CC-004_humidity_01", "type": "humidity", "frequency": 60},
+            {"sensor_id": "CC-004_energy_01", "type": "energy_consumption", "frequency": 300}
+          ]
+        },
+        {
+          "unit_id": "CC-005",
+          "sensors": [
+            {"sensor_id": "CC-005_temp_01", "type": "temperature", "frequency": 10},
+            {"sensor_id": "CC-005_pressure_01", "type": "pressure", "frequency": 10},
+            {"sensor_id": "CC-005_flow_01", "type": "flow_rate", "frequency": 5},
+            {"sensor_id": "CC-005_co2_01", "type": "co2_concentration", "frequency": 30},
+            {"sensor_id": "CC-005_humidity_01", "type": "humidity", "frequency": 60},
+            {"sensor_id": "CC-005_energy_01", "type": "energy_consumption", "frequency": 300}
+          ]
+        }
+      ],
+      "expected_metrics": {
+        "total_sensor_readings": 150000,
+        "average_response_time": 50,
+        "max_response_time": 200,
+        "error_rate": 0.001,
+        "throughput_sustained": 800,
+        "memory_usage_max": "2GB",
+        "cpu_usage_max": "70%"
+      }
+    },
+    "scenarios": [
+      {
+        "name": "normal_operation",
+        "description": "Normal sensor data ingestion with typical load",
+        "duration": 180,
+        "ramp_up": 30,
+        "users": 50,
+        "expected_response_time": 100,
+        "acceptable_error_rate": 0.005
+      },
+      {
+        "name": "peak_load",
+        "description": "High load scenario simulating peak operation",
+        "duration": 60,
+        "ramp_up": 10,
+        "users": 200,
+        "expected_response_time": 200,
+        "acceptable_error_rate": 0.01
+      },
+      {
+        "name": "stress_test",
+        "description": "Extreme load to test system limits",
+        "duration": 30,
+        "ramp_up": 5,
+        "users": 500,
+        "expected_response_time": 500,
+        "acceptable_error_rate": 0.05
+      },
+      {
+        "name": "recovery_test",
+        "description": "Test system recovery after overload",
+        "duration": 30,
+        "ramp_up": 0,
+        "users": 100,
+        "expected_response_time": 150,
+        "acceptable_error_rate": 0.002
+      }
+    ]
+  },
+  {
+    "test_id": "load_test_002",
+    "description": "AI optimization API performance test",
+    "duration_seconds": 600,
+    "concurrent_users": 50,
+    "requests_per_second": 200,
+    "test_data": {
+      "optimization_requests": [
+        {
+          "unit_id": "CC-001",
+          "sensor_data": {
+            "temperature": 27.5,
+            "pressure": 98.7,
+            "flow_rate": 95.2,
+            "humidity": 58.3,
+            "air_quality": 87.5,
+            "energy_consumption": 187.4,
+            "co2_concentration": 412.8,
+            "unit_age_days": 365,
+            "maintenance_days_since": 30,
+            "efficiency_current": 94.7
+          },
+          "expected_processing_time": 500
+        },
+        {
+          "unit_id": "CC-002",
+          "sensor_data": {
+            "temperature": 29.1,
+            "pressure": 97.3,
+            "flow_rate": 88.7,
+            "humidity": 62.1,
+            "air_quality": 82.3,
+            "energy_consumption": 201.2,
+            "co2_concentration": 389.4,
+            "unit_age_days": 180,
+            "maintenance_days_since": 15,
+            "efficiency_current": 93.2
+          },
+          "expected_processing_time": 450
+        }
+      ],
+      "expected_metrics": {
+        "total_requests": 120000,
+        "average_response_time": 300,
+        "max_response_time": 1000,
+        "error_rate": 0.002,
+        "throughput_sustained": 150,
+        "ai_model_inference_time_avg": 200,
+        "memory_usage_max": "4GB",
+        "cpu_usage_max": "85%"
+      }
+    },
+    "scenarios": [
+      {
+        "name": "efficiency_optimization",
+        "description": "Test efficiency optimization API under load",
+        "endpoint": "/api/ai/optimize/efficiency",
+        "method": "POST",
+        "duration": 300,
+        "users": 30,
+        "expected_response_time": 400,
+        "acceptable_error_rate": 0.01
+      },
+      {
+        "name": "maintenance_prediction",
+        "description": "Test predictive maintenance API performance",
+        "endpoint": "/api/ai/predict/maintenance",
+        "method": "POST",
+        "duration": 300,
+        "users": 20,
+        "expected_response_time": 350,
+        "acceptable_error_rate": 0.005
+      }
+    ]
+  },
+  {
+    "test_id": "load_test_003",
+    "description": "Database performance and scalability test",
+    "duration_seconds": 900,
+    "concurrent_users": 200,
+    "requests_per_second": 500,
+    "test_data": {
+      "database_operations": [
+        {
+          "operation": "sensor_data_insert",
+          "frequency": 100,
+          "payload_size": 1024,
+          "expected_latency": 10
+        },
+        {
+          "operation": "unit_status_query",
+          "frequency": 50,
+          "expected_latency": 5
+        },
+        {
+          "operation": "historical_data_aggregation",
+          "frequency": 10,
+          "time_range": "24h",
+          "expected_latency": 100
+        },
+        {
+          "operation": "analytics_report_generation",
+          "frequency": 5,
+          "data_points": 10000,
+          "expected_latency": 500
+        }
+      ],
+      "data_volume": {
+        "sensor_readings_per_day": 10000000,
+        "historical_data_retention_days": 365,
+        "total_database_size": "500GB",
+        "backup_frequency": "daily",
+        "replication_factor": 3
+      },
+      "expected_metrics": {
+        "total_operations": 450000,
+        "average_response_time": 50,
+        "max_response_time": 200,
+        "error_rate": 0.001,
+        "database_connections_active": 100,
+        "query_cache_hit_rate": 0.95,
+        "disk_iops": 5000,
+        "network_throughput": "1Gbps"
+      }
+    },
+    "scenarios": [
+      {
+        "name": "read_heavy_workload",
+        "description": "Test database performance under read-heavy load",
+        "read_write_ratio": 0.9,
+        "duration": 300,
+        "users": 150,
+        "expected_response_time": 30,
+        "acceptable_error_rate": 0.002
+      },
+      {
+        "name": "write_heavy_workload",
+        "description": "Test database performance under write-heavy load",
+        "read_write_ratio": 0.1,
+        "duration": 300,
+        "users": 100,
+        "expected_response_time": 80,
+        "acceptable_error_rate": 0.005
+      },
+      {
+        "name": "mixed_workload",
+        "description": "Test database performance under mixed read/write load",
+        "read_write_ratio": 0.5,
+        "duration": 300,
+        "users": 200,
+        "expected_response_time": 60,
+        "acceptable_error_rate": 0.003
+      }
+    ]
+  },
+  {
+    "test_id": "load_test_004",
+    "description": "Real-time dashboard and WebSocket performance test",
+    "duration_seconds": 1200,
+    "concurrent_users": 1000,
+    "requests_per_second": 2000,
+    "test_data": {
+      "websocket_connections": 500,
+      "dashboard_users": 500,
+      "real_time_updates": {
+        "sensor_data_frequency": 10,
+        "alert_frequency": 5,
+        "optimization_frequency": 60,
+        "dashboard_refresh_interval": 5000
+      },
+      "expected_metrics": {
+        "websocket_connections_stable": 450,
+        "message_delivery_rate": 0.999,
+        "average_latency": 50,
+        "max_latency": 200,
+        "connection_drops": 5,
+        "memory_usage_max": "8GB",
+        "cpu_usage_max": "60%",
+        "network_bandwidth": "100Mbps"
+      }
+    },
+    "scenarios": [
+      {
+        "name": "websocket_scaling",
+        "description": "Test WebSocket connection scaling",
+        "connections_target": 1000,
+        "ramp_up_time": 300,
+        "message_rate": 100,
+        "expected_message_latency": 100
+      },
+      {
+        "name": "dashboard_performance",
+        "description": "Test dashboard performance under load",
+        "users": 500,
+        "page_load_time_target": 2000,
+        "api_response_time_target": 300,
+        "acceptable_error_rate": 0.005
+      },
+      {
+        "name": "real_time_updates",
+        "description": "Test real-time data streaming performance",
+        "update_frequency": 10,
+        "data_volume": 1000000,
+        "delivery_guarantee": 0.9999
+      }
+    ]
+  },
+  {
+    "test_id": "load_test_005",
+    "description": "Blockchain integration performance test",
+    "duration_seconds": 1800,
+    "concurrent_users": 20,
+    "requests_per_second": 50,
+    "test_data": {
+      "blockchain_operations": [
+        {
+          "operation": "credit_minting",
+          "frequency": 10,
+          "gas_limit": 200000,
+          "expected_confirmation_time": 30
+        },
+        {
+          "operation": "credit_transfer",
+          "frequency": 20,
+          "gas_limit": 100000,
+          "expected_confirmation_time": 20
+        },
+        {
+          "operation": "marketplace_listing",
+          "frequency": 5,
+          "gas_limit": 150000,
+          "expected_confirmation_time": 25
+        },
+        {
+          "operation": "credit_verification",
+          "frequency": 50,
+          "read_only": true,
+          "expected_response_time": 2
+        }
+      ],
+      "expected_metrics": {
+        "total_transactions": 5400,
+        "average_confirmation_time": 25,
+        "max_confirmation_time": 120,
+        "transaction_success_rate": 0.995,
+        "gas_usage_efficient": true,
+        "blockchain_sync_delay": 5,
+        "smart_contract_errors": 0.001
+      }
+    },
+    "scenarios": [
+      {
+        "name": "transaction_storm",
+        "description": "Test blockchain under high transaction volume",
+        "transactions_per_second": 20,
+        "duration": 600,
+        "expected_success_rate": 0.99
+      },
+      {
+        "name": "gas_optimization",
+        "description": "Test gas usage optimization",
+        "optimize_gas": true,
+        "duration": 600,
+        "gas_target_reduction": 0.1
+      },
+      {
+        "name": "network_congestion",
+        "description": "Test performance during network congestion",
+        "concurrent_txs": 100,
+        "duration": 600,
+        "acceptable_delay_increase": 2.0
+      }
+    ]
+  },
+  {
+    "test_id": "load_test_006",
+    "description": "End-to-end integration performance test",
+    "duration_seconds": 3600,
+    "concurrent_users": 100,
+    "requests_per_second": 300,
+    "test_data": {
+      "user_journeys": [
+        {
+          "journey": "unit_monitoring",
+          "steps": [
+            {"action": "login", "endpoint": "/auth/login", "expected_time": 200},
+            {"action": "view_dashboard", "endpoint": "/dashboard", "expected_time": 500},
+            {"action": "view_units", "endpoint": "/units", "expected_time": 300},
+            {"action": "view_unit_details", "endpoint": "/units/CC-001", "expected_time": 400},
+            {"action": "view_sensor_data", "endpoint": "/units/CC-001/sensors", "expected_time": 600},
+            {"action": "logout", "endpoint": "/auth/logout", "expected_time": 100}
+          ],
+          "frequency": 10
+        },
+        {
+          "journey": "ai_optimization",
+          "steps": [
+            {"action": "login", "endpoint": "/auth/login", "expected_time": 200},
+            {"action": "request_optimization", "endpoint": "/ai/optimize/efficiency", "expected_time": 800},
+            {"action": "view_optimization_results", "endpoint": "/units/CC-001/ai", "expected_time": 300},
+            {"action": "apply_optimization", "endpoint": "/units/CC-001/optimize", "expected_time": 500},
+            {"action": "logout", "endpoint": "/auth/logout", "expected_time": 100}
+          ],
+          "frequency": 5
+        },
+        {
+          "journey": "carbon_credit_trading",
+          "steps": [
+            {"action": "login", "endpoint": "/auth/login", "expected_time": 200},
+            {"action": "view_credits", "endpoint": "/credits", "expected_time": 400},
+            {"action": "list_credit_for_sale", "endpoint": "/credits/list", "expected_time": 300},
+            {"action": "browse_marketplace", "endpoint": "/marketplace", "expected_time": 500},
+            {"action": "execute_trade", "endpoint": "/marketplace/trade", "expected_time": 1000},
+            {"action": "logout", "endpoint": "/auth/logout", "expected_time": 100}
+          ],
+          "frequency": 2
+        }
+      ],
+      "expected_metrics": {
+        "total_user_journeys": 10000,
+        "journey_completion_rate": 0.98,
+        "average_journey_time": 3000,
+        "max_journey_time": 10000,
+        "error_rate_per_journey": 0.02,
+        "end_to_end_latency": 500,
+        "system_availability": 0.999,
+        "data_consistency": 1.0
+      }
+    },
+    "scenarios": [
+      {
+        "name": "peak_business_hours",
+        "description": "Simulate peak business hours usage",
+        "time_window": "9:00-17:00",
+        "user_multiplier": 2.0,
+        "duration": 1800,
+        "expected_performance_degradation": 1.5
+      },
+      {
+        "name": "off_peak_night_operation",
+        "description": "Test system performance during off-peak hours",
+        "time_window": "2:00-6:00",
+        "user_multiplier": 0.2,
+        "duration": 1800,
+        "expected_energy_savings": 0.3
+      }
+    ]
+  }
+]

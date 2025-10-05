@@ -1,0 +1,1249 @@
+openapi: 3.0.3
+info:
+  title: Carbon Capture Network API
+  description: |
+    Comprehensive API for the AI-Powered Carbon Capture and Storage Network.
+
+    This API provides endpoints for managing carbon capture units, sensors, AI optimization,
+    carbon credits, and system monitoring.
+  version: 1.0.0
+  contact:
+    name: Carbon Capture Network Team
+    email: api@carboncapture.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.carboncapture.com
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Health Check
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the API server
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                  environment:
+                    type: string
+                  version:
+                    type: string
+
+  # Authentication
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                organization:
+                  type: string
+                phone:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, operator, admin]
+                  default: user
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  /api/auth/me:
+    get:
+      summary: Get current user
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  # Units Management
+  /api/units:
+    get:
+      summary: Get all units
+      tags: [Units]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, maintenance, error, offline]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Units retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CarbonCaptureUnit'
+
+    post:
+      summary: Create new unit
+      tags: [Units]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUnitRequest'
+      responses:
+        '201':
+          description: Unit created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CarbonCaptureUnit'
+
+  /api/units/{id}:
+    get:
+      summary: Get single unit
+      tags: [Units]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unit retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CarbonCaptureUnit'
+
+    put:
+      summary: Update unit
+      tags: [Units]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUnitRequest'
+      responses:
+        '200':
+          description: Unit updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CarbonCaptureUnit'
+
+    delete:
+      summary: Delete unit
+      tags: [Units]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unit deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+
+  # Sensors Management
+  /api/sensors:
+    get:
+      summary: Get all sensors
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unitId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [temperature, pressure, flow_rate, co2_concentration, energy_consumption, humidity, vibration, motor_current]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, maintenance, error, calibrating]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Sensors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SensorData'
+
+    post:
+      summary: Create new sensor
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSensorRequest'
+      responses:
+        '201':
+          description: Sensor created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/SensorData'
+
+  /api/sensors/{id}:
+    get:
+      summary: Get single sensor
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sensor retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/SensorData'
+
+    put:
+      summary: Update sensor
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSensorRequest'
+      responses:
+        '200':
+          description: Sensor updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/SensorData'
+
+    delete:
+      summary: Delete sensor
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sensor deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+
+  /api/sensors/{id}/readings:
+    post:
+      summary: Add sensor reading
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: number
+                quality:
+                  type: string
+                  enum: [good, fair, poor]
+                  default: good
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Reading added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      sensorId:
+                        type: string
+                      value:
+                        type: number
+                      unit:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      quality:
+                        type: string
+
+    get:
+      summary: Get sensor readings
+      tags: [Sensors]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Readings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                  sensor:
+                    type: object
+                    properties:
+                      sensorId:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                      unit:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: number
+                        timestamp:
+                          type: string
+                          format: date-time
+                        quality:
+                          type: string
+
+  # AI Optimization
+  /api/ai/optimize/{unitId}:
+    post:
+      summary: Optimize unit efficiency
+      tags: [AI]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unitId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationalData:
+                  type: object
+                  properties:
+                    energy_consumption:
+                      type: number
+                    renewable_energy_available:
+                      type: number
+                    renewable_usage:
+                      type: number
+                    grid_usage:
+                      type: number
+                    peak_hours:
+                      type: boolean
+      responses:
+        '200':
+          description: Optimization completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      unit_id:
+                        type: string
+                      efficiency_optimization:
+                        type: object
+                      maintenance_prediction:
+                        type: object
+                      energy_optimization:
+                        type: object
+                      timestamp:
+                        type: string
+                        format: date-time
+
+  /api/ai/health:
+    get:
+      summary: Get AI model health
+      tags: [AI]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: AI health status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      overall_status:
+                        type: string
+                      models:
+                        type: object
+                      version:
+                        type: string
+                      last_check:
+                        type: string
+                        format: date-time
+
+  # Carbon Credits
+  /api/credits:
+    get:
+      summary: Get carbon credits
+      tags: [Credits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, retired, expired]
+        - name: vintage
+          in: query
+          schema:
+            type: integer
+        - name: methodology
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Credits retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CarbonCredit'
+
+    post:
+      summary: Create carbon credit
+      tags: [Credits]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditRequest'
+      responses:
+        '201':
+          description: Credit created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CarbonCredit'
+
+  /api/credits/{id}/transfer:
+    post:
+      summary: Transfer carbon credit
+      tags: [Credits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - toUserId
+                - amount
+              properties:
+                toUserId:
+                  type: string
+                amount:
+                  type: number
+                  minimum: 0
+                price:
+                  type: number
+                  minimum: 0
+                transactionType:
+                  type: string
+                  enum: [transfer, sale]
+                  default: transfer
+      responses:
+        '200':
+          description: Credit transferred successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      creditId:
+                        type: string
+                      transferred:
+                        type: number
+                      from:
+                        type: string
+                      to:
+                        type: string
+                      transactionId:
+                        type: string
+
+  # Reports
+  /api/reports/units/{unitId}/performance:
+    get:
+      summary: Get unit performance report
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unitId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: timeframe
+          in: query
+          schema:
+            type: string
+            default: '30d'
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, pdf]
+            default: json
+      responses:
+        '200':
+          description: Performance report generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/PerformanceReport'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [user, operator, admin]
+        organization:
+          type: string
+        isVerified:
+          type: boolean
+        carbonCredits:
+          type: object
+          properties:
+            totalCredits:
+              type: number
+            availableCredits:
+              type: number
+            retiredCredits:
+              type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    CarbonCaptureUnit:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        capacity:
+          type: object
+          properties:
+            co2PerDay:
+              type: number
+            efficiency:
+              type: number
+        status:
+          type: string
+          enum: [active, inactive, maintenance, error, offline]
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            city:
+              type: string
+            country:
+              type: string
+            coordinates:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+        owner:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+
+    SensorData:
+      type: object
+      properties:
+        sensorId:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        unitId:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, maintenance, error, calibrating]
+        currentReading:
+          type: object
+          properties:
+            value:
+              type: number
+            unit:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            quality:
+              type: string
+              enum: [good, fair, poor]
+        location:
+          type: object
+          properties:
+            zone:
+              type: string
+            position:
+              type: string
+
+    CarbonCredit:
+      type: object
+      properties:
+        creditId:
+          type: string
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [removal, reduction, avoidance, nature_based, technology_based]
+        methodology:
+          type: string
+        vintage:
+          type: integer
+        currentOwner:
+          $ref: '#/components/schemas/User'
+        validFrom:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+        verification:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [pending, verified, rejected, expired]
+        retirement:
+          type: object
+          properties:
+            isRetired:
+              type: boolean
+            retirementReason:
+              type: string
+        market:
+          type: object
+          properties:
+            listed:
+              type: boolean
+            askingPrice:
+              type: number
+
+    Pagination:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+        totalPages:
+          type: integer
+        totalUnits:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    CreateUnitRequest:
+      type: object
+      required:
+        - name
+        - capacity
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        capacity:
+          type: object
+          required:
+            - co2PerDay
+          properties:
+            co2PerDay:
+              type: number
+              minimum: 0
+            efficiency:
+              type: number
+              minimum: 0
+              maximum: 100
+        technology:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [direct_air_capture, flue_gas, industrial_process, ocean_based]
+            sorbentType:
+              type: string
+            manufacturer:
+              type: string
+            model:
+              type: string
+        location:
+          type: object
+          properties:
+            address:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            country:
+              type: string
+            postalCode:
+              type: string
+            coordinates:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                longitude:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+
+    UpdateUnitRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [active, inactive, maintenance, error, offline]
+        capacity:
+          type: object
+          properties:
+            efficiency:
+              type: number
+              minimum: 0
+              maximum: 100
+
+    CreateSensorRequest:
+      type: object
+      required:
+        - unitId
+        - sensorId
+        - name
+        - type
+      properties:
+        unitId:
+          type: string
+        sensorId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [temperature, pressure, flow_rate, co2_concentration, energy_consumption, humidity, vibration, motor_current]
+        location:
+          type: object
+          properties:
+            zone:
+              type: string
+            position:
+              type: string
+
+    UpdateSensorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        status:
+          type: string
+          enum: [active, inactive, maintenance, error, calibrating]
+        thresholds:
+          type: object
+          properties:
+            warning:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            critical:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+
+    CreateCreditRequest:
+      type: object
+      required:
+        - unitId
+        - amount
+        - vintage
+        - methodology
+        - co2Captured
+      properties:
+        unitId:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        vintage:
+          type: integer
+          minimum: 2000
+        methodology:
+          type: string
+          enum: [direct_air_capture, carbon_capture_utilization_storage, reforestation, soil_carbon, mineralization]
+        co2Captured:
+          type: number
+          minimum: 0
+        validFrom:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+
+    PerformanceReport:
+      type: object
+      properties:
+        unit:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            capacity:
+              type: object
+        timeframe:
+          type: object
+          properties:
+            days:
+              type: integer
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+        performance:
+          type: object
+          properties:
+            efficiency:
+              type: object
+            energyConsumption:
+              type: object
+            carbonCapture:
+              type: object
+            sensorHealth:
+              type: object
+        alerts:
+          type: array
+          items:
+            type: object
+        aiOptimization:
+          type: object
+        generatedAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
