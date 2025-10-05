@@ -1,0 +1,8 @@
+# Carbon Capture Network Authorized Digital Sellers
+# This file lists authorized sellers for programmatic advertising
+
+# Placeholder - Add your authorized seller information here
+# Format: domain.com, publisher_id, DIRECT|RESELLER, TAG_ID
+# Example: google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Contact: ads@carboncapture.network

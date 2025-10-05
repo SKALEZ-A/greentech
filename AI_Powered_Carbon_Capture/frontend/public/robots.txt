@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /api/
+Allow: /dashboard
+Allow: /units
+Allow: /reports
+Allow: /analytics
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /api/private/
+Disallow: /_next/
+Disallow: /api/auth/
+
+# Allow crawling of public assets
+Allow: /manifest.json
+Allow: /sitemap.xml
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://carboncapture.network/sitemap.xml

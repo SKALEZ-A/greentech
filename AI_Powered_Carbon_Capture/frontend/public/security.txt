@@ -1,0 +1,8 @@
+# Carbon Capture Network Security Policy
+# Contact information for security researchers and responsible disclosure
+
+Contact: security@carboncapture.network
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://carboncapture.network/pgp-key.txt
+Preferred-Languages: en
+Canonical: https://carboncapture.network/.well-known/security.txt

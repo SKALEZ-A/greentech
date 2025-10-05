@@ -1,0 +1,27 @@
+/* TEAM */
+Chief Executive Officer: Dr. Sarah Chen
+Chief Technology Officer: Michael Rodriguez
+Chief Science Officer: Dr. Emily Watson
+Head of AI/ML: Dr. James Park
+Lead Developer: Alex Thompson
+
+/* SITE */
+Last update: 2024/01/15
+Language: English
+Doctype: HTML5
+IDE: Cursor, VS Code
+
+/* COMPONENTS */
+Frontend Framework: Next.js, React
+UI Library: Material-UI, Tailwind CSS
+Backend: Node.js, Express
+Database: PostgreSQL, MongoDB
+AI/ML: TensorFlow, scikit-learn, Python
+Blockchain: Solidity, Web3.js
+
+/* THANKS */
+Climate scientists, environmental engineers, and open source community
+for their contributions to carbon capture technology.
+
+/* SITE */
+https://carboncapture.network
